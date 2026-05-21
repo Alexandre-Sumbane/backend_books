@@ -1,0 +1,368 @@
+openapi: 3.0.0
+info:
+  title: Categories API
+  description: API para gerenciamento de categorias
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+tags:
+  - name: Categories
+    description: Operações relacionadas a categorias
+
+paths:
+  /categories:
+    post:
+      summary: Criar uma nova categoria
+      description: Cria uma nova categoria no sistema
+      operationId: createCategory
+      tags:
+        - Categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Nome da categoria
+                  example: "Família"
+                description:
+                  type: string
+                  description: Descrição detalhada da categoria
+                  example: "Eventos familiares, encontros infantis, parques e atividades sociais."
+                imageUrl:
+                  type: string
+                  description: URL da imagem da categoria
+                  format: uri
+                  example: "https://example.com/categoria-familia.jpg"
+            example:
+              name: "Família"
+              description: "Eventos familiares, encontros infantis, parques e atividades sociais."
+              imageUrl: "https://example.com/familia.jpg"
+      responses:
+        "201":
+          description: Categoria criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Família"
+                description: "Eventos familiares, encontros infantis, parques e atividades sociais."
+                imageUrl: "https://example.com/familia.jpg"
+                createdAt: "2024-01-01T00:00:00.000Z"
+                updatedAt: "2024-01-01T00:00:00.000Z"
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: Listar todas as categorias
+      description: Retorna uma lista com todas as categorias cadastradas
+      operationId: getAllCategories
+      tags:
+        - Categories
+      responses:
+        "200":
+          description: Lista de categorias recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategorySummary"
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "Família"
+                  description: "Eventos familiares, encontros infantis, parques e atividades sociais."
+                  imageUrl: "https://example.com/familia.jpg"
+                - id: "987fcdeb-51a3-42d7-b893-123456789000"
+                  name: "Tecnologia"
+                  description: "Eventos de tecnologia, inovação e startups"
+                  imageUrl: null
+                - id: "456def78-91a2-34b5-c678-901234567000"
+                  name: "Esportes"
+                  description: "Eventos esportivos, competições e atividades físicas"
+                  imageUrl: "https://example.com/esportes.jpg"
+        "404":
+          description: Nenhuma categoria encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                statusCode: 404
+                message: "No categories found"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /categories/{id}:
+    get:
+      summary: Buscar categoria por ID
+      description: Retorna os detalhes de uma categoria específica incluindo seus livros
+      operationId: getCategoryById
+      tags:
+        - Categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Categoria encontrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryWithBooks"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Família"
+                description: "Eventos familiares, encontros infantis, parques e atividades sociais."
+                imageUrl: "https://example.com/familia.jpg"
+                books:
+                  - id: "book-123"
+                    title: "Guia de Atividades em Família"
+                    isbn: "978-1234567890"
+                    author: "Maria Silva"
+                  - id: "book-456"
+                    title: "Parques e Diversão"
+                    isbn: "978-0987654321"
+                    author: "João Santos"
+        "404":
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                statusCode: 404
+                message: "Category not found"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      summary: Atualizar categoria
+      description: Atualiza os dados de uma categoria existente
+      operationId: updateCategory
+      tags:
+        - Categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria a ser atualizada
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nome da categoria
+                  example: "Família e Lazer"
+                description:
+                  type: string
+                  description: Descrição detalhada da categoria
+                  example: "Eventos familiares, encontros infantis, parques, atividades sociais e lazer"
+                imageUrl:
+                  type: string
+                  description: URL da imagem da categoria
+                  format: uri
+                  example: "https://example.com/familia-lazer.jpg"
+            example:
+              name: "Família e Lazer"
+              description: "Eventos familiares, encontros infantis, parques, atividades sociais e lazer"
+              imageUrl: "https://example.com/familia-lazer-atualizada.jpg"
+      responses:
+        "204":
+          description: Categoria atualizada com sucesso (sem conteúdo retornado)
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                statusCode: 404
+                message: "Category not found"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Deletar categoria
+      description: Remove uma categoria do sistema
+      operationId: deleteCategory
+      tags:
+        - Categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID da categoria a ser deletada
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "204":
+          description: Categoria deletada com sucesso (sem conteúdo retornado)
+        "404":
+          description: Categoria não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                statusCode: 404
+                message: "Category not found"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único da categoria
+        name:
+          type: string
+          description: Nome da categoria
+        description:
+          type: string
+          nullable: true
+          description: Descrição detalhada da categoria
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL da imagem da categoria
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do registro
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+
+    CategorySummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único da categoria
+        name:
+          type: string
+          description: Nome da categoria
+        description:
+          type: string
+          nullable: true
+          description: Descrição detalhada da categoria
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL da imagem da categoria
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do livro
+        title:
+          type: string
+          description: Título do livro
+        isbn:
+          type: string
+          description: Código ISBN do livro
+        author:
+          type: string
+          description: Nome do autor do livro
+        publicationYear:
+          type: integer
+          description: Ano de publicação
+          example: 2023
+
+    CategoryWithBooks:
+      allOf:
+        - $ref: "#/components/schemas/CategorySummary"
+        - type: object
+          properties:
+            books:
+              type: array
+              description: Lista de livros pertencentes a esta categoria
+              items:
+                $ref: "#/components/schemas/Book"
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: Código de status HTTP
+          example: 404
+        message:
+          type: string
+          description: Mensagem de erro
+          example: "Resource not found"
+        error:
+          type: string
+          description: Tipo do erro
+          example: "Not Found"
+      required:
+        - statusCode
+        - message

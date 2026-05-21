@@ -1,0 +1,349 @@
+openapi: 3.0.0
+info:
+  title: Authors API
+  description: API para gerenciamento de autores
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+tags:
+  - name: Authors
+    description: Operações relacionadas a autores
+
+paths:
+  /authors:
+    post:
+      summary: Criar um novo autor
+      description: Cria um novo autor no sistema
+      operationId: createAuthor
+      tags:
+        - Authors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - lastName
+              properties:
+                name:
+                  type: string
+                  description: Nome do autor
+                  example: "Alex"
+                lastName:
+                  type: string
+                  description: Sobrenome do autor
+                  example: "Developer"
+                imageUrl:
+                  type: string
+                  description: URL da imagem do autor
+                  format: uri
+                  example: "https://example.com/author-image.jpg"
+            example:
+              name: "Alex"
+              lastName: "Developer"
+      responses:
+        '201':
+          description: Autor criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorResponse'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Alex"
+                lastName: "Developer"
+                imageUrl: null
+                createdAt: "2024-01-01T00:00:00.000Z"
+                updatedAt: "2024-01-01T00:00:00.000Z"
+        '400':
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Listar todos os autores
+      description: Retorna uma lista com todos os autores cadastrados
+      operationId: getAllAuthors
+      tags:
+        - Authors
+      responses:
+        '200':
+          description: Lista de autores recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuthorSummary'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "Alex"
+                  lastName: "Developer"
+                  imageUrl: "https://example.com/alex.jpg"
+                - id: "987fcdeb-51a3-42d7-b893-123456789000"
+                  name: "Jane"
+                  lastName: "Smith"
+                  imageUrl: null
+        '404':
+          description: Nenhum autor encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 404
+                message: "No authors found"
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /authors/{id}:
+    get:
+      summary: Buscar autor por ID
+      description: Retorna os detalhes de um autor específico incluindo seus livros
+      operationId: getAuthorById
+      tags:
+        - Authors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do autor
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Autor encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorWithBooks'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Alex"
+                lastName: "Developer"
+                imageUrl: "https://example.com/alex.jpg"
+                books:
+                  - id: "book-123"
+                    title: "Programming 101"
+                    isbn: "978-1234567890"
+                  - id: "book-456"
+                    title: "Advanced Node.js"
+                    isbn: "978-0987654321"
+        '404':
+          description: Autor não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 404
+                message: "Author not found"
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      summary: Atualizar autor
+      description: Atualiza os dados de um autor existente
+      operationId: updateAuthor
+      tags:
+        - Authors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do autor a ser atualizado
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nome do autor
+                  example: "Alexander"
+                lastName:
+                  type: string
+                  description: Sobrenome do autor
+                  example: "Developer Jr"
+                imageUrl:
+                  type: string
+                  description: URL da imagem do autor
+                  format: uri
+                  example: "https://example.com/alexander.jpg"
+            example:
+              name: "Alexander"
+              lastName: "Developer Jr"
+              imageUrl: "https://example.com/alexander.jpg"
+      responses:
+        '204':
+          description: Autor atualizado com sucesso (sem conteúdo retornado)
+        '400':
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Autor não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 404
+                message: "Author not found"
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Deletar autor
+      description: Remove um autor do sistema
+      operationId: deleteAuthor
+      tags:
+        - Authors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do autor a ser deletado
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '204':
+          description: Autor deletado com sucesso (sem conteúdo retornado)
+        '404':
+          description: Autor não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 404
+                message: "Author not found"
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AuthorResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do autor
+        name:
+          type: string
+          description: Nome do autor
+        lastName:
+          type: string
+          description: Sobrenome do autor
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL da imagem do autor
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do registro
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+
+    AuthorSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do autor
+        name:
+          type: string
+          description: Nome do autor
+        lastName:
+          type: string
+          description: Sobrenome do autor
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL da imagem do autor
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único do livro
+        title:
+          type: string
+          description: Título do livro
+        isbn:
+          type: string
+          description: Código ISBN do livro
+
+    AuthorWithBooks:
+      allOf:
+        - $ref: '#/components/schemas/AuthorSummary'
+        - type: object
+          properties:
+            books:
+              type: array
+              description: Lista de livros do autor
+              items:
+                $ref: '#/components/schemas/Book'
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: Código de status HTTP
+          example: 404
+        message:
+          type: string
+          description: Mensagem de erro
+          example: "Resource not found"
+        error:
+          type: string
+          description: Tipo do erro
+          example: "Not Found"

@@ -1,0 +1,10 @@
+require('ts-node/register'); // 🔑 ESSENCIAL
+
+const { resolve } = require('path');
+
+module.exports = {
+  config: resolve(__dirname, 'src', 'config', 'sequelize', 'config.js'),
+  //'models-path': resolve(__dirname, 'src', 'models'),
+  'migrations-path': resolve(__dirname, 'src', 'database', 'migrations'),
+  'seeders-path': resolve(__dirname, 'src', 'database', 'seeders'),
+};
