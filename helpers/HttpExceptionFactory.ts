@@ -2,6 +2,8 @@ import { BusinessException } from "../src/Exceptions/BusinessExceptions";
 
 export class HttpExceptionFactory {
 
+  constructor() {}
+
   static badRequest(message: string) {
     return new BusinessException(message, 400);
   }

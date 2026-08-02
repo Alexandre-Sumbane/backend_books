@@ -5,14 +5,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch server.ts",
+    "dev": "tsx watch ./src/main/server.ts",
     "start": "node ./dist/server.js",
-    "build": "tsup server.ts --out-dir dist"
+    "build": "tsup ./src/main/server.ts --out-dir dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.9.1",
     "@types/swagger-jsdoc": "^6.0.4",
@@ -29,11 +30,15 @@
     "class-validator": "^0.15.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "mysql2": "^3.22.3",
     "sequelize": "^6.37.8",
     "swagger": "^0.7.5",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.10",
+    "zod": "4.4.3"
   }
 }
