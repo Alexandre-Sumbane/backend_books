@@ -10,6 +10,7 @@ const envSchema = z.object({
     DBUSER: z.string(),
     DBPASSWORD: z.string(),
     DBHOST: z.string(),
+    DBPORT: z.coerce.number(),
     DBDIALECT: z.string(),
 });
 

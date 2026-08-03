@@ -1,27 +1,25 @@
-import { DataTypes, Model, Optional } from "sequelize"
-import sequelizeConnection from "@/infra/database/config/database"
+import { DataTypes, Model, Optional } from "sequelize";
+import sequelizeConnection from "@/infra/database/config/database";
 export interface EbookFileAttributes {
-  id: string
-  ebookId: string
-  fileName: string
-  originalName: string
-  fileUrl?: string
+  id: string;
+  ebookId: string;
+  fileName: string;
+  originalName: string;
+  fileUrl?: string;
 }
 
-export interface EbookFileInput
-  extends Optional<EbookFileAttributes, 'id'> {}
-export interface EbookFileOutput
-  extends Required<EbookFileAttributes> {}
+export interface EbookFileInput extends Optional<EbookFileAttributes, "id"> {}
+export interface EbookFileOutput extends Required<EbookFileAttributes> {}
 
 export class EbookFile
   extends Model<EbookFileAttributes, EbookFileInput>
   implements EbookFileAttributes
 {
-  declare id: string
-  declare ebookId: string
-  declare fileName: string
-  declare originalName: string
-  declare fileUrl?: string
+  declare id: string;
+  declare ebookId: string;
+  declare fileName: string;
+  declare originalName: string;
+  declare fileUrl?: string;
 }
 
 EbookFile.init(
@@ -43,21 +41,32 @@ EbookFile.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'eBooks',
-        key: 'id'
+        model: "Ebooks",
+        key: "id",
       },
-      onDelete: 'CASCADE'
+      onDelete: "CASCADE",
     },
     fileUrl: {
-      type: DataTypes.STRING,
-      allowNull: false
+      type: DataTypes.VIRTUAL,
+      get() {
+        const appUrl = (
+          process.env.APP_URL ?? `http://localhost:${process.env.PORT ?? 4008}`
+        ).replace(/\/$/, "");
+
+        const fileName = this.getDataValue("fileName");
+
+        if (!fileName) {
+          return null;
+        }
+
+        return `${appUrl}/${fileName}`;
+      },
     },
   },
   {
     sequelize: sequelizeConnection,
     tableName: "EbookFiles",
-    modelName: 'EbookFile',
-    paranoid: true,
+    modelName: "EbookFile",
     timestamps: true,
-  }
-)
+  },
+);

@@ -2,6 +2,7 @@ import { DataTypes, Model, Optional } from 'sequelize'
 import sequelizeConnection from '@/infra/database/config/database'
 import { CoverImage } from './coverImage'
 import { EbookFile } from './bookFile'
+import { CartItem } from './cartitem';
 
 enum EbookStatus {
     pendent,
@@ -10,27 +11,29 @@ enum EbookStatus {
 }
 
 export interface EBookModel {
-    id: string
-    title: string
-    code: string
-    author: string
-    description: string
-    price: number
-    rating: number
-    totalReviews: number
-    categoryId: string 
-    format: string
-    pages?: number
-    publishDate?: Date
-    statePublisher?: EbookStatus
-    userId?: string
+    id: string;
+    title: string;
+    code: string;
+    author: string;
+    language: string;
+    description?: string;
+    sinopse?: string;
+    price: number;
+    categoryId: string; 
+    format: string;
+    pages?: number;
+    rating?: number;
+    totalReviews?: number;
+    publishDate?: Date;
+    statePublisher?: EbookStatus;
+    userId?: string;
 }
 
 export interface EBookDto
     extends Optional<EBookModel, 'id' | 'publishDate' | 'statePublisher'  | 'rating' | 'totalReviews'> {}
 
 
-export class EBook 
+export class Ebook 
     extends Model<EBookModel, EBookDto>
     implements EBookModel
 {
@@ -38,7 +41,9 @@ export class EBook
     declare title: string
     declare code: string
     declare author: string
-    declare description: string
+    declare language: string
+    declare description?: string
+    declare sinopse?: string;
     declare price: number
     declare rating: number
     declare totalReviews: number
@@ -50,7 +55,7 @@ export class EBook
     declare userId?: string        
 }
 
-EBook.init(
+Ebook.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -69,6 +74,14 @@ EBook.init(
         author: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        language: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        sinopse: {
+            type: DataTypes.STRING,
+            allowNull: true
         },
         description: {
             type: DataTypes.STRING,
@@ -122,20 +135,26 @@ EBook.init(
         timestamps: true,
         sequelize: sequelizeConnection,
         paranoid: true,
-        tableName: 'eBooks', 
+        modelName: 'Ebook',
+        tableName: 'Ebooks', 
     },   
 )
 
-EBook.hasOne(CoverImage, {
+Ebook.hasOne(CoverImage, {
     sourceKey: 'id',
     foreignKey: 'ebookId',
     as: 'cover'
 })
 
-EBook.hasOne(EbookFile, {
+Ebook.hasOne(EbookFile, {
     foreignKey: 'ebookId',
     as: 'ebookDoc'
 })
+
+Ebook.hasMany(CartItem, {
+    foreignKey: "bookId",
+    as: "cartItems"
+});
 
 
 

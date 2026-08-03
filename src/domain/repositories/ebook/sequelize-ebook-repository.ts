@@ -1,18 +1,34 @@
-import { EbookDto } from "@/domain/Dto/Book";
+import { EbookDto, EbookResponse } from "@/domain/Dto/Book";
 import { EbookRepository } from "./ebook-repository";
 
-import { EBook } from "@/domain/model/book";
+import { Ebook } from "@/domain/model/book";
+
+import { CoverImage } from "@/domain/model/coverImage";
+import { EbookFile } from "@/domain/model/bookFile";
 
 
 export class SequelizeEbooksRepository implements EbookRepository {
-    async create(data: EbookDto){
-        const ebook = await EBook.create(data);
+    async create(data: EbookDto, cover: Express.Multer.File, pdf: Express.Multer.File){
+        
+        const ebook = await Ebook.create(data);
+
+        await CoverImage.create({
+            ebookId: ebook.id,
+            fileName: cover.filename,
+            originalName: cover.originalname
+        });
+
+        await EbookFile.create({
+            ebookId: ebook.id,
+            fileName: pdf?.filename,
+            originalName: pdf?.originalname
+        });
 
         return ebook;
     }
 
-    async findById(ebookId: string){
-        const ebook = await EBook.findOne({
+    async findById(ebookId: string) {
+        const ebook = await Ebook.findOne({
             where: {
                 id: ebookId
             }
@@ -22,27 +38,58 @@ export class SequelizeEbooksRepository implements EbookRepository {
     }
 
     async findByCategoryId(categoryId: string){
-        const ebooks = await EBook.findAll({
+        const ebooks = await Ebook.findAll({
             where: {
                 categoryId
-            }
+            },
+            include: [
+                {
+                    model: CoverImage,
+                    required: true
+                },
+                {
+                    model: EbookFile,
+                    required: true
+                }
+            ]
         });
 
         return ebooks;
     }
 
-    async findByCode(code: string) {
-        const ebook = await EBook.findOne({
+    async findByCode(code: string){
+        const ebook = await Ebook.findOne({
             where: {
                 code
-            }
+            },
+            include: [
+                {
+                    model: CoverImage,
+                    required: true
+                },
+                {
+                    model: EbookFile,
+                    required: true
+                }
+            ]
         });
 
         return ebook;
     }
 
-    async findAll() {
-        const ebooks = await EBook.findAll();
+    async findAll(): Promise<EbookResponse[]> {
+        const ebooks = await Ebook.findAll({
+            include: [
+                {
+                    model: CoverImage,
+                    as: 'cover',
+                },
+                {
+                    model: EbookFile,
+                    as: 'ebookDoc',
+                }
+            ]
+        });
 
         return ebooks;
     }

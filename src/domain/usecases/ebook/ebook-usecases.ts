@@ -2,26 +2,37 @@ import { EbookRepository } from "@/domain/repositories/ebook/ebook-repository";
 import { HttpExceptionFactory } from "../../../../helpers/HttpExceptionFactory";
 import { EbookDto, EbookResponse } from "@/domain/Dto/Book";
 
+import { Request } from "express";
 
 export class EBookUsecases {
-
   constructor(private ebookRepository: EbookRepository) {}
-  async create(book: EbookDto): Promise<EbookResponse> {
+  async create(book: EbookDto, req: Request): Promise<EbookResponse> {
+    const files = req.files as {
+      cover?: Express.Multer.File[];
+      file?: Express.Multer.File[];
+    };
+
+    const cover = files.cover?.[0];
+    const pdf = files.file?.[0];
+
+    if (!cover || !pdf) {
+      throw HttpExceptionFactory.badRequest("Nenhum ficheiro foi enviado!");
+    }
 
     const bookFound = await this.ebookRepository.findByCode(book.code);
 
-
     if (bookFound) {
-      throw HttpExceptionFactory.conflict("O livro já existe, tente outro código!");
+      throw HttpExceptionFactory.conflict(
+        "O livro já existe, tente outro código!",
+      );
     }
-  
-    const newBook = await this.ebookRepository.create(book);
+
+    const newBook = await this.ebookRepository.create(book, cover, pdf);
 
     return newBook;
   }
 
   async findAll(): Promise<EbookResponse[]> {
-
     const books = await this.ebookRepository.findAll();
 
     if (books.length === 0) {
@@ -30,7 +41,6 @@ export class EBookUsecases {
 
     return books;
   }
-
 
   async findById(id: string): Promise<EbookResponse> {
     const book = await this.ebookRepository.findById(id);
@@ -46,7 +56,9 @@ export class EBookUsecases {
     const book = await this.ebookRepository.findByCategoryId(categoryId);
 
     if (!book) {
-      throw HttpExceptionFactory.notFound("Livro nao encontrado para a categoria informada!");
+      throw HttpExceptionFactory.notFound(
+        "Livro nao encontrado para a categoria informada!",
+      );
     }
 
     return book;
@@ -61,7 +73,7 @@ export class EBookUsecases {
 
     const book = await this.ebookRepository.update(id, data);
 
-   return book;
+    return book;
   }
 
   async delete(id: string): Promise<void> {

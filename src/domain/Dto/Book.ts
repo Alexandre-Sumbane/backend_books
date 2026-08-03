@@ -5,15 +5,17 @@ enum EbookStatus {
 }
 
 export interface EbookDto {
-    title: string
-    code: string
-    author: string
-    description: string
-    price: number
-    categoryId: string 
-    format: string
-    pages?: number
-    userId?: string
+    title: string;
+    code: string;
+    language: string;
+    author: string;
+    sinopse?: string;
+    description?: string;
+    price: number;
+    categoryId: string;
+    format: string;
+    pages?: number;
+    userId?: string;
 }
 
 export interface EbookResponse {
@@ -21,7 +23,9 @@ export interface EbookResponse {
     code: string
     title: string
     author: string
-    description: string
+    language: string
+    sinopse?: string
+    description?: string
     price: number
     rating?: number
     totalReviews?: number

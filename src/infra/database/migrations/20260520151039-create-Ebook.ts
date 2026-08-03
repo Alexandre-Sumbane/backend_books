@@ -1,44 +1,66 @@
-"use strict";
+import { QueryInterface, DataTypes } from "sequelize";
 
-import { DataTypes, QueryInterface } from "sequelize";
-
-module.exports = {
-  async up(queryInterface: QueryInterface, ) {
-    await queryInterface.createTable("Books", {
+export default {
+  async up(queryInterface: QueryInterface) {
+    await queryInterface.createTable("Ebooks", {
       id: {
         type: DataTypes.UUID,
-        primaryKey: true,
-        allowNull: false,
         defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true,
       },
+
       title: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      description: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
+
       code: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
       },
-      price: {
-        type: DataTypes.FLOAT,
+
+      author: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
+
+      language: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+
+      sinopse: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+      },
+
       rating: {
         type: DataTypes.FLOAT,
         allowNull: true,
+        defaultValue: 0,
       },
+
       totalReviews: {
         type: DataTypes.INTEGER,
         allowNull: true,
+        defaultValue: 0,
       },
+
       categoryId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "Categories",
           key: "id",
@@ -46,36 +68,55 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-     format: {
+
+      format: {
         type: DataTypes.STRING,
         allowNull: false,
       },
+
       pages: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+
       publishDate: {
         type: DataTypes.DATE,
         allowNull: true,
       },
+
       statePublisher: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.ENUM(
+          "pendent",
+          "published",
+          "blocked"
+        ),
+        defaultValue: "pendent",
         allowNull: true,
       },
-      createdAt: {
-        allowNull: false,
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: true
       },
-      updatedAt: {
-        allowNull: false,
+
+      createdAt: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        allowNull: false,
+      },
+
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+
+      deletedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
     });
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.dropTable("Books");
+    await queryInterface.dropTable("Ebooks");
   },
 };

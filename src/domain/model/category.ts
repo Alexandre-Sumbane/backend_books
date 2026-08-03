@@ -2,14 +2,20 @@ import { DataTypes, Model, Optional } from "sequelize";
 
 import dbConnection from "../../infra/database/config/database";
 
-import { CategoryAttributes } from "../Dto/category";
-import { EBook } from "./book";
+import { CategoryDto } from "../Dto/category";
+import { Ebook} from "./book";
 
-export interface CategoryInput extends Optional<CategoryAttributes, "id"> {}
-export interface CategoryOutput extends Required<CategoryAttributes> {}
+export interface CategoryAttributes {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 export class Category
-  extends Model<CategoryAttributes, CategoryInput>
+  extends Model<CategoryAttributes, CategoryDto>
   implements CategoryAttributes
 {
   declare id: string;
@@ -49,7 +55,7 @@ Category.init(
   },
 );
 
-Category.hasMany(EBook, {
+Category.hasMany(Ebook, {
       foreignKey: "categoryId",
       as: "books",
     });

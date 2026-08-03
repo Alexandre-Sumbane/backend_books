@@ -15,7 +15,7 @@ module.exports = {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "Books",
+          model: "Ebooks",
           key: "id",
         },
         onDelete: "CASCADE",

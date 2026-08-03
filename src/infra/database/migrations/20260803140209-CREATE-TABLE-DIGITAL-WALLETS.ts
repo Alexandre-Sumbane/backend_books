@@ -4,7 +4,7 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   async up(queryInterface: QueryInterface) {
-    await queryInterface.createTable("AuthorBooks", {
+    await queryInterface.createTable("digitalWallets", {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -12,43 +12,59 @@ module.exports = {
         defaultValue: DataTypes.UUIDV4,
       },
 
-      authorId: {
+      amount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+      },
+
+      transactionReference: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+
+      thirdPartyReference: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+
+      paymentId: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "Authors",
+          model: "Payments",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
 
-      bookId: {
-        type: DataTypes.UUID,
+      responseDescription: {
+        type: DataTypes.STRING,
         allowNull: false,
-        references: {
-          model: "Ebooks",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+      },
+
+      phoneNumber: {
+        type: DataTypes.BIGINT,
+        allowNull: false,
       },
 
       createdAt: {
-        allowNull: false,
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
       },
 
       updatedAt: {
-        allowNull: false,
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
-      },
+      }
     });
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.dropTable("AuthorBooks");
+    await queryInterface.dropTable("digitalWallets");
   },
 };

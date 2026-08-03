@@ -1,15 +1,26 @@
 import { Router } from "express";
-import { CreateEbook } from "../controllers/ebook.ts/create-ebook-controller";
-import { GetAllEbooks } from "../controllers/ebook.ts/findall-ebooks-controller";
-import { GetEbookById } from "../controllers/ebook.ts/find-by-ebook-by-id-controller";
-import { UpdateEbook } from "../controllers/ebook.ts/update-ebook-controller";
-import { DeleteEbook } from "../controllers/ebook.ts/delete-ebook-controller";
+
+import { EbookController } from "../controllers/ebook-controller";
+
+import multer from "multer";
+import multerConfig from "../../infra/config/multer-config";
+
+const upload = multer(multerConfig);
+
+const router = Router();
+
+router.post(
+  "/",
+  upload.fields([
+    { name: "cover", maxCount: 5 },
+    { name: "file", maxCount: 1 },
+  ]),
+  EbookController.create,
+);
+router.get("/", EbookController.findAll);
+router.get("/:ebookId", EbookController.findById);
+router.put("/:ebookId", EbookController.update);
+router.delete("/:ebookId", EbookController.delete);
 
 
-export async function BookRoutes(router: Router) {
-    router.post("/", CreateEbook);
-    router.get("/", GetAllEbooks);
-    router.get("/:ebookId", GetEbookById);
-    router.put("/:ebookId", UpdateEbook);
-    router.delete("/:ebookId", DeleteEbook);
-}
+export default router;

@@ -4,54 +4,49 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   async up(queryInterface: QueryInterface) {
-    await queryInterface.createTable("Transferences", {
+    await queryInterface.createTable("EbookFiles", {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
         defaultValue: DataTypes.UUIDV4,
       },
-      status: {
-        type: DataTypes.ENUM("pending", "processing","confirmed", "blocked"),
-        allowNull: false,
-        defaultValue: "pending"
-      },
-      transactionId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        unique: true
-      },
-      reference: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      reason: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      paymentId: {
+
+      ebookId: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "Payments",
+          model: "Ebooks",
           key: "id",
         },
+        onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
+
+      fileName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
+      originalName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       createdAt: {
-        allowNull: false,
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+
       updatedAt: {
-        allowNull: false,
         type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW,
       },
     });
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.dropTable("Transferences");
+    await queryInterface.dropTable("EbookFiles");
   },
 };
