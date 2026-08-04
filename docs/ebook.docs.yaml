@@ -234,21 +234,15 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /books/seller/{userId}:
+  /books/seller:
     get:
-      summary: Buscar ebooks por vendedor
-      description: Retorna todos os ebooks listados por um vendedor específico
+      summary: Buscar ebooks do vendedor autenticado
+      description: Retorna todos os ebooks do vendedor identificado pelo token JWT.
       operationId: getEbooksBySeller
       tags:
         - Ebooks
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          description: ID do vendedor
-          schema:
-            type: string
-          example: "123e4567-e89b-12d3-a456-426614174000"
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Ebooks recuperados com sucesso
@@ -279,8 +273,20 @@ paths:
                     pages: 250
                     publishDate: "2026-08-04T12:00:00.000Z"
                     statePublisher: "published"
+        "401":
+          description: Token não fornecido ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Nenhum ebook encontrado para o vendedor informado
+          description: Nenhum ebook encontrado para o vendedor autenticado
           content:
             application/json:
               schema:
