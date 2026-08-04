@@ -1,5 +1,7 @@
 import swaggerJsdoc from "swagger-jsdoc";
 
+import { env } from "@/env";
+
 
 const options = {
   definition: {
@@ -12,7 +14,7 @@ const options = {
     servers: [
       {
         // url: "https://backend.unitec.co.mz",
-        url: "http://localhost:5203",
+        url: `${env.APP_URL} || http://localhost:5203`
       },
     ],
   },
