@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
 import { Author } from "./author";
-import { Ebook } from "./book";
 
 export interface AuthorBookModel {
   id: string;

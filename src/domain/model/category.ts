@@ -3,7 +3,7 @@ import { DataTypes, Model, Optional } from "sequelize";
 import dbConnection from "../../infra/database/config/database";
 
 import { CategoryDto } from "../Dto/category";
-import { Ebook} from "./book";
+import { Ebook } from "./book";
 
 export interface CategoryAttributes {
   id: string;
@@ -54,8 +54,3 @@ Category.init(
     timestamps: true,
   },
 );
-
-Category.hasMany(Ebook, {
-      foreignKey: "categoryId",
-      as: "books",
-    });

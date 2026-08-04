@@ -27,6 +27,8 @@ export class EBookUsecases {
       );
     }
 
+    book.userId = req.user ? req.user.userId : "";
+
     const newBook = await this.ebookRepository.create(book, cover, pdf);
 
     return newBook;
@@ -59,6 +61,16 @@ export class EBookUsecases {
       throw HttpExceptionFactory.notFound(
         "Livro nao encontrado para a categoria informada!",
       );
+    }
+
+    return book;
+  }
+
+  async findBySeller(userId: string): Promise<EbookResponse[]> {
+    const book = await this.ebookRepository.findBySeller(userId);
+
+    if (!book) {
+      throw HttpExceptionFactory.notFound("Livro nao encontrado!");
     }
 
     return book;

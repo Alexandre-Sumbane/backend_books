@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
+import { Ebook } from "./book";
 export interface CoverImageAttributes {
   id: string;
   ebookId: string;
@@ -48,7 +49,7 @@ CoverImage.init(
           return null;
         }
 
-        return `${appUrl}/${imagePath}`;
+        return `${appUrl}/uploads/img/Covers/${imagePath}`;
       },
     },
     ebookId: {

@@ -12,6 +12,8 @@ const envSchema = z.object({
     DBHOST: z.string(),
     DBPORT: z.coerce.number(),
     DBDIALECT: z.string(),
+    AUTH_SERVICE_URL: z.string(),
+    JWT_SECRET: z.string()
 });
 
 const _env = envSchema.safeParse(process.env);

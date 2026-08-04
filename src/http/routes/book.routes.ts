@@ -9,8 +9,10 @@ const upload = multer(multerConfig);
 
 const router = Router();
 
+import { AuthMiddleware } from "../../infra/middleware/AuthMiddleware";
+
 router.post(
-  "/",
+  "/", AuthMiddleware.authenticate,
   upload.fields([
     { name: "cover", maxCount: 5 },
     { name: "file", maxCount: 1 },
@@ -18,9 +20,11 @@ router.post(
   EbookController.create,
 );
 router.get("/", EbookController.findAll);
+router.get("/category/:categoryId", EbookController.findByCategoryId);
+router.get("/seller", AuthMiddleware.authenticate, EbookController.findBySeller);
 router.get("/:ebookId", EbookController.findById);
-router.put("/:ebookId", EbookController.update);
-router.delete("/:ebookId", EbookController.delete);
+router.put("/:ebookId", AuthMiddleware.authenticate, EbookController.update);
+router.delete("/:ebookId", AuthMiddleware.authenticate, EbookController.delete);
 
 
 export default router;

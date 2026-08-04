@@ -20,6 +20,8 @@ paths:
       operationId: createCategory
       tags:
         - Categories
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -176,6 +178,8 @@ paths:
       operationId: updateCategory
       tags:
         - Categories
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -240,6 +244,8 @@ paths:
       operationId: deleteCategory
       tags:
         - Categories
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
@@ -358,7 +364,6 @@ components:
         message:
           type: string
           description: Mensagem de erro
-          example: "Resource not found"
         error:
           type: string
           description: Tipo do erro
@@ -366,3 +371,9 @@ components:
       required:
         - statusCode
         - message
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

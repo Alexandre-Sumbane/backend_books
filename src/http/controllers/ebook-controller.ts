@@ -1,4 +1,5 @@
 import { BusinessException } from "@/Exceptions/BusinessExceptions";
+import { userIsAssociado } from "@/domain/usecases/auth/auth-usecases";
 
 import { MakeEBookUsecase } from "@/domain/usecases/factories/make-book-usecase";
 
@@ -10,6 +11,21 @@ export class EbookController {
   static async create(req: Request, res: Response): Promise<Response> {
     try {
 
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const user = await userIsAssociado(req.user.userId, req.user.token);
+
+      if (!user) {
+        return res.status(403).json({
+          success: false,
+          message: "Não autorizado a criar Books",
+        });
+      }
     
       const ebook = await ebookUsecase.create(req.body, req);
 
@@ -65,7 +81,7 @@ export class EbookController {
       const ebook = await ebookUsecase.findById(ebookId);
 
       return res.status(200).json({
-        success: false,
+        success: true,
         ebook,
       });
     } catch (error: any) {
@@ -83,7 +99,81 @@ export class EbookController {
     }
   }
 
+  static async findByCategoryId(req: Request, res: Response): Promise<Response> {
+    const { categoryId } = req.params as { categoryId: string };
+    try {
+      const ebooks = await ebookUsecase.findByCategoryId(categoryId);
+
+      return res.status(200).json({
+        success: true,
+        ebooks,
+      });
+    } catch (error: any) {
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          sucess: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao listar Books por categoria, tente novamente!",
+      });
+    }
+  }
+
+  static async findBySeller(req: Request, res: Response): Promise<Response> {
+    try {
+      if(!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const ebooks = await ebookUsecase.findBySeller(req.user.userId);
+
+      return res.status(200).json({
+        success: true,
+        ebooks,
+      });
+    } catch (error: any) {
+      console.log(error);
+      
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          sucess: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao listar Books por vendedor, tente novamente!",
+      });
+    }
+  }
+
+
   static async update(req: Request, res: Response): Promise<Response> {
+
+    if(!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Usuário não autenticado",
+      });
+    }
+
+    const user = await userIsAssociado(req.user.userId, req.user.token);
+
+    if (!user) {
+      return res.status(403).json({
+        success: false,
+        message: "Não autorizado a actualizar Books",
+      });
+    }
+
     const { ebookId } = req.params as { ebookId: string };
     try {
       const ebook = await ebookUsecase.update(ebookId, req.body);
@@ -113,6 +203,23 @@ export class EbookController {
 
     const { ebookId } = req.params as { ebookId: string };
     try {
+
+      if(!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const user = await userIsAssociado(req.user.userId, req.user.token);
+
+      if (!user) {
+        return res.status(403).json({
+          success: false,
+          message: "Não autorizado a eliminar Books",
+        });
+      }
+
       const ebookUsecase = MakeEBookUsecase();
 
       const ebook = await ebookUsecase.delete(ebookId);

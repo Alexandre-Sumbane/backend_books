@@ -4,6 +4,7 @@ import multer, { FileFilterCallback } from 'multer';
 import { resolve, extname } from 'path';
 
 const nr_aleatorio = (): number => Math.floor(Math.random() * 10000 + 10000);
+const uploadsRoot = resolve(process.cwd(), 'src', 'infra', 'infra', 'uploads');
 
 export default {
   fileFilter: (req: Request, file: Express.Multer.File, cb: FileFilterCallback): void => {
@@ -41,13 +42,7 @@ export default {
         folder = 'pdfs';
       }
 
-      const uploadPath = resolve(
-      __dirname,
-      "..",
-      "infra",
-      "uploads",
-      folder
-    );
+      const uploadPath = resolve(uploadsRoot, folder);
 
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });

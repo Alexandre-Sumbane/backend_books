@@ -59,7 +59,7 @@ EbookFile.init(
           return null;
         }
 
-        return `${appUrl}/${fileName}`;
+        return `${appUrl}/uploads/pdfs/${fileName}`;
       },
     },
   },

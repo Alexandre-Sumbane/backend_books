@@ -1,33 +1,65 @@
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
-import jwt from "jsonwebtoken";
+
+import { env } from "@/env";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: string;
+        token: string;
+        userType?: string;
+        role?: string;
+      };
+    }
+  }
+}
+
+interface TokenPayload extends JwtPayload {
+  id: string;
+  userType?: string;
+  role?: string;
+}
 
 export class AuthMiddleware {
-    async authenticate(req: Request, res: Response, next: NextFunction) {
-        try {
-            const authHeader = req.headers.authorization;
+  static async authenticate(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.split(" ")[1];
 
-            const token = authHeader && authHeader.split(" ")[1];
+      if (!token) {
+        return res.status(401).json({
+          message: "Token não fornecido",
+        });
+      }
 
-            if (!token) {
-                return res.status(401).json({ message: "Token não fornecido" });
-            }
-
-             const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+      const decoded = jwt.verify(
+        token,
+        env.JWT_SECRET!
+      ) as TokenPayload;
 
       req.user = {
-        //...user.toJSON(),
         userId: decoded.id,
         token,
         userType: decoded.userType,
-        role: decoded.role
+        role: decoded.role,
       };
+
       console.log("User authenticated:", req.user);
 
-      
-            next();
-        } catch (error) {
-            return res.status(500).json({ message: "Internal Server Error" });
-        }
+      next();
+    } catch (err) {
+      console.error(err);
+
+      return res.status(403).json({
+        message: "Token inválido",
+      });
     }
+  }
 }

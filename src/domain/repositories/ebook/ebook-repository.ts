@@ -9,6 +9,7 @@ export interface EbookRepository {
   findByCode(code: string): Promise<EbookResponse | null>;
   findAll(): Promise<EbookResponse[]>;
   findByCategoryId(categoryId: string): Promise<EbookResponse[]>;
+  findBySeller(userId: string): Promise<EbookResponse[]>
   update(ebookId: string, ebookData: EbookDto): Promise<EbookResponse | null>;
   delete(ebookId: string): Promise<void>;
 }

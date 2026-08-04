@@ -7,6 +7,7 @@ import CategoryRoutes from "@/http/routes/category.routes";
 import path from "path";
 
 const app = express();
+const uploadsRoot = path.resolve(process.cwd(), "src", "infra", "infra", "uploads");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,12 +17,7 @@ app.use(morgan("dev"));
 app.use("/categories", CategoryRoutes);
 app.use("/books", BookRoutes);
 
-app.use(
-  "/uploads",
-  express.static(
-    path.resolve(__dirname, "..", "infra", "uploads")
-  )
-);
+app.use("/uploads", express.static(uploadsRoot));
     
 
 // app.use("/img/cover", staticfolderImages);

@@ -1,0 +1,589 @@
+openapi: 3.0.0
+info:
+  title: Ebooks API
+  description: API para gerenciamento de eBooks
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+tags:
+  - name: Ebooks
+    description: Operações relacionadas a ebooks
+
+paths:
+  /books:
+    post:
+      summary: Criar um novo ebook
+      description: Cria um novo registro de ebook e armazena arquivos de capa e PDF.
+      operationId: createEbook
+      tags:
+        - Ebooks
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - code
+                - author
+                - categoryId
+                - format
+                - language
+                - price
+              properties:
+                title:
+                  type: string
+                  description: Título do ebook
+                  example: "Aprendendo TypeScript"
+                code:
+                  type: string
+                  description: Código único do ebook
+                  example: "TS-001"
+                description:
+                  type: string
+                  description: Descrição do ebook
+                  example: "Um guia completo para programadores que querem dominar TypeScript."
+                sinopse:
+                  type: string
+                  description: Sinopse do ebook
+                  example: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                author:
+                  type: string
+                  description: Autor do ebook
+                  example: "João da Silva"
+                categoryId:
+                  type: string
+                  description: ID da categoria ao qual o ebook pertence
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                format:
+                  type: string
+                  description: Formato do ebook
+                  example: "PDF"
+                language:
+                  type: string
+                  description: Idioma do ebook
+                  example: "Português"
+                price:
+                  type: number
+                  description: Preço do ebook
+                  example: 29.9
+                pages:
+                  type: integer
+                  description: Quantidade de páginas do ebook
+                  example: 250
+                cover:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Arquivos de imagem de capa
+                file:
+                  type: string
+                  format: binary
+                  description: Arquivo PDF do ebook
+            example:
+              title: "Aprendendo TypeScript"
+              code: "TS-001"
+              description: "Um guia completo para programadores que querem dominar TypeScript."
+              sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+              author: "João da Silva"
+              categoryId: "123e4567-e89b-12d3-a456-426614174000"
+              format: "PDF"
+              language: "Português"
+              price: 29.9
+              pages: 250
+      responses:
+        "201":
+          description: Ebook criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                message: "Book criado com sucesso!"
+                ebook:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  code: "TS-001"
+                  title: "Aprendendo TypeScript"
+                  author: "João da Silva"
+                  language: "Português"
+                  sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                  description: "Um guia completo para programadores que querem dominar TypeScript."
+                  price: 29.9
+                  categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                  format: "PDF"
+                  pages: 250
+                  publishDate: "2026-08-04T12:00:00.000Z"
+                  statePublisher: "published"
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: Listar todos os ebooks
+      descrição: Retorna uma lista com todos os ebooks cadastrados
+      operationId: getAllEbooks
+      tags:
+        - Ebooks
+      responses:
+        "200":
+          description: Lista de ebooks recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  ebooks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                ebooks:
+                  - id: "123e4567-e89b-12d3-a456-426614174000"
+                    code: "TS-001"
+                    title: "Aprendendo TypeScript"
+                    author: "João da Silva"
+                    language: "Português"
+                    sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                    description: "Um guia completo para programadores que querem dominar TypeScript."
+                    price: 29.9
+                    categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                    format: "PDF"
+                    pages: 250
+                    publishDate: "2026-08-04T12:00:00.000Z"
+                    statePublisher: "published"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books/category/{categoryId}:
+    get:
+      summary: Buscar ebooks por categoria
+      description: Retorna todos os ebooks associados a uma categoria específica
+      operationId: getEbooksByCategory
+      tags:
+        - Ebooks
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: ID da categoria
+          schema:
+            type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Ebooks recuperados com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  ebooks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                ebooks:
+                  - id: "123e4567-e89b-12d3-a456-426614174000"
+                    code: "TS-001"
+                    title: "Aprendendo TypeScript"
+                    author: "João da Silva"
+                    language: "Português"
+                    sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                    description: "Um guia completo para programadores que querem dominar TypeScript."
+                    price: 29.9
+                    categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                    format: "PDF"
+                    pages: 250
+                    publishDate: "2026-08-04T12:00:00.000Z"
+                    statePublisher: "published"
+        "404":
+          description: Nenhum ebook encontrado para a categoria informada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books/seller/{userId}:
+    get:
+      summary: Buscar ebooks por vendedor
+      description: Retorna todos os ebooks listados por um vendedor específico
+      operationId: getEbooksBySeller
+      tags:
+        - Ebooks
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID do vendedor
+          schema:
+            type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Ebooks recuperados com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  ebooks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                ebooks:
+                  - id: "123e4567-e89b-12d3-a456-426614174000"
+                    code: "TS-001"
+                    title: "Aprendendo TypeScript"
+                    author: "João da Silva"
+                    language: "Português"
+                    sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                    description: "Um guia completo para programadores que querem dominar TypeScript."
+                    price: 29.9
+                    categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                    format: "PDF"
+                    pages: 250
+                    publishDate: "2026-08-04T12:00:00.000Z"
+                    statePublisher: "published"
+        "404":
+          description: Nenhum ebook encontrado para o vendedor informado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books/{ebookId}:
+    get:
+      summary: Buscar ebook por ID
+      description: Retorna os dados de um ebook específico
+      operationId: getEbookById
+      tags:
+        - Ebooks
+      parameters:
+        - name: ebookId
+          in: path
+          required: true
+          description: ID do ebook
+          schema:
+            type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Ebook recuperado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  ebook:
+                    $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                ebook:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  code: "TS-001"
+                  title: "Aprendendo TypeScript"
+                  author: "João da Silva"
+                  language: "Português"
+                  sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                  description: "Um guia completo para programadores que querem dominar TypeScript."
+                  price: 29.9
+                  categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                  format: "PDF"
+                  pages: 250
+                  publishDate: "2026-08-04T12:00:00.000Z"
+                  statePublisher: "published"
+        "404":
+          description: Ebook não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Atualizar ebook
+      description: Atualiza os dados de um ebook existente
+      operationId: updateEbook
+      tags:
+        - Ebooks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ebookId
+          in: path
+          required: true
+          description: ID do ebook a ser atualizado
+          schema:
+            type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                code:
+                  type: string
+                description:
+                  type: string
+                sinopse:
+                  type: string
+                author:
+                  type: string
+                categoryId:
+                  type: string
+                format:
+                  type: string
+                language:
+                  type: string
+                price:
+                  type: number
+                pages:
+                  type: integer
+            example:
+              title: "Aprendendo TypeScript - Edição Atualizada"
+              price: 34.9
+      responses:
+        "200":
+          description: Ebook atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  ebook:
+                    $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                message: "Dados do Book actualizados com sucesso!"
+                ebook:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  code: "TS-001"
+                  title: "Aprendendo TypeScript - Edição Atualizada"
+                  author: "João da Silva"
+                  language: "Português"
+                  sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                  description: "Um guia completo para programadores que querem dominar TypeScript."
+                  price: 34.9
+                  categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                  format: "PDF"
+                  pages: 250
+                  publishDate: "2026-08-04T12:00:00.000Z"
+                  statePublisher: "published"
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Token não fornecido ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ebook não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Deletar ebook
+      description: Remove um ebook do sistema
+      operationId: deleteEbook
+      tags:
+        - Ebooks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ebookId
+          in: path
+          required: true
+          description: ID do ebook a ser deletado
+          schema:
+            type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Ebook deletado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  ebook:
+                    $ref: "#/components/schemas/EbookResponse"
+              example:
+                success: true
+                message: "Book deletado com sucesso!"
+                ebook:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  code: "TS-001"
+                  title: "Aprendendo TypeScript"
+                  author: "João da Silva"
+                  language: "Português"
+                  sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
+                  description: "Um guia completo para programadores que querem dominar TypeScript."
+                  price: 29.9
+                  categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                  format: "PDF"
+                  pages: 250
+                  publishDate: "2026-08-04T12:00:00.000Z"
+                  statePublisher: "published"
+        "401":
+          description: Token não fornecido ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Ebook não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    EbookResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        language:
+          type: string
+        sinopse:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+        categoryId:
+          type: string
+        format:
+          type: string
+        pages:
+          type: integer
+          nullable: true
+        publishDate:
+          type: string
+          format: date-time
+          nullable: true
+        statePublisher:
+          type: string
+          enum:
+            - pendent
+            - published
+            - blocked
+          nullable: true
+        userId:
+          type: string
+          nullable: true
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+          nullable: true
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

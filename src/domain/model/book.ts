@@ -1,7 +1,8 @@
-import { DataTypes, Model, Optional } from 'sequelize'
 import sequelizeConnection from '@/infra/database/config/database'
-import { CoverImage } from './coverImage'
-import { EbookFile } from './bookFile'
+import { DataTypes, Model, Optional } from 'sequelize'
+import { Category } from './category';
+import { CoverImage } from './coverImage';
+import { EbookFile } from './bookFile';
 import { CartItem } from './cartitem';
 
 enum EbookStatus {
@@ -140,21 +141,30 @@ Ebook.init(
     },   
 )
 
-Ebook.hasOne(CoverImage, {
-    sourceKey: 'id',
-    foreignKey: 'ebookId',
-    as: 'cover'
-})
+Ebook.hasMany(CoverImage, {
+  sourceKey: "id",
+  foreignKey: "ebookId",
+  as: "cover",
+});
 
 Ebook.hasOne(EbookFile, {
-    foreignKey: 'ebookId',
-    as: 'ebookDoc'
-})
+  sourceKey: "id",
+  foreignKey: "ebookId",
+  as: "ebookDoc",
+});
 
 Ebook.hasMany(CartItem, {
-    foreignKey: "bookId",
-    as: "cartItems"
+  foreignKey: "bookId",
+  as: "cartItems",
 });
+
+Ebook.belongsTo(Category, {
+  foreignKey: "categoryId",
+  as: "category",
+});
+
+
+
 
 
 
