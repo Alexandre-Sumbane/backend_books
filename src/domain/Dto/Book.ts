@@ -12,6 +12,7 @@ export interface EbookDto {
     sinopse?: string;
     description?: string;
     price: number;
+    quantity?: number;
     categoryId: string;
     format: string;
     pages?: number;
@@ -26,7 +27,8 @@ export interface EbookResponse {
     language: string
     sinopse?: string
     description?: string
-    price: number
+    price: number;
+    quantity?: number
     rating?: number
     totalReviews?: number
     categoryId: string 

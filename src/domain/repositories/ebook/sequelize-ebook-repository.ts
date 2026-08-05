@@ -165,6 +165,18 @@ export class SequelizeEbooksRepository implements EbookRepository {
     return ebook;
   }
 
+   async updateQuantity(ebookId: string, quantity: number) {
+    const ebookFound = await this.findById(ebookId);
+
+    if (!ebookFound) {
+      return null;
+    }
+
+    const ebook = await ebookFound.update({ quantity });
+
+    return ebook;
+  }
+
   async delete(ebookId: string) {
     const ebookFound = await this.findById(ebookId);
 

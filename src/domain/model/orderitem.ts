@@ -1,16 +1,16 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
-import { Order } from "./order";
 
 export interface OrderItemModel {
   id: string;
+  orderId: string;
   bookId: string;
   quantity: number;
 }
 
 export interface OrderItemDto extends Optional<
   OrderItemModel,
-  "id" | "quantity"
+  "id" 
 > {}
 
 export class OrderItem
@@ -18,6 +18,7 @@ export class OrderItem
   implements OrderItemModel
 {
   declare id: string;
+  declare orderId: string;
   declare bookId: string;
   declare quantity: number;
 }
@@ -29,6 +30,11 @@ OrderItem.init(
       primaryKey: true,
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
+    },
+
+    orderId: {
+      type: DataTypes.UUID,
+      allowNull: false,
     },
 
     bookId: {

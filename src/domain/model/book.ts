@@ -20,6 +20,7 @@ export interface EBookModel {
     description?: string;
     sinopse?: string;
     price: number;
+    quantity?: number
     categoryId: string; 
     format: string;
     pages?: number;
@@ -45,7 +46,8 @@ export class Ebook
     declare language: string
     declare description?: string
     declare sinopse?: string;
-    declare price: number
+    declare price: number;
+    declare quantity?: number
     declare rating: number
     declare totalReviews: number
     declare categoryId: string
@@ -91,6 +93,10 @@ Ebook.init(
         price: {
             type: DataTypes.DECIMAL,
             allowNull: false,
+        },
+        quantity: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
         },
         rating: {
             type: DataTypes.FLOAT,

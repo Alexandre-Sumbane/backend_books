@@ -1,0 +1,338 @@
+openapi: 3.0.0
+info:
+  title: Locations API
+  description: API para gerenciamento de locais
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+tags:
+  - name: Locations
+    description: Operações relacionadas a locais
+
+paths:
+  /locations:
+    post:
+      summary: Criar um novo local
+      description: Cria um novo registro de local
+      operationId: createLocation
+      tags:
+        - Locations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - price
+              properties:
+                name:
+                  type: string
+                  description: Nome do local
+                  example: "Parque Central"
+                description:
+                  type: string
+                  description: Descrição do local
+                  example: "Local amplo com áreas verdes e eventos culturais."
+                price:
+                  type: number
+                  description: Preço associado ao local
+                  example: 25.5
+            example:
+              name: "Parque Central"
+              description: "Local amplo com áreas verdes e eventos culturais."
+              price: 25.5
+      responses:
+        "201":
+          description: Local criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationResponse"
+              example:
+                success: true
+                message: "Local criado com sucesso"
+                location:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "Parque Central"
+                  description: "Local amplo com áreas verdes e eventos culturais."
+                  price: 25.5
+                  createdAt: "2026-08-05T12:00:00.000Z"
+                  updatedAt: "2026-08-05T12:00:00.000Z"
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: Listar todos os locais
+      description: Retorna uma lista com todos os locais cadastrados
+      operationId: getAllLocations
+      tags:
+        - Locations
+      responses:
+        "200":
+          description: Lista de locais recuperada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  locations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LocationResponse"
+              example:
+                success: true
+                locations:
+                  - id: "123e4567-e89b-12d3-a456-426614174000"
+                    name: "Parque Central"
+                    description: "Local amplo com áreas verdes e eventos culturais."
+                    price: 25.5
+                    createdAt: "2026-08-05T12:00:00.000Z"
+                    updatedAt: "2026-08-05T12:00:00.000Z"
+        "404":
+          description: Nenhum local encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                statusCode: 404
+                message: "Nenhum local encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /locations/{locationId}:
+    get:
+      summary: Buscar local por ID
+      description: Retorna os detalhes de um local específico
+      operationId: getLocationById
+      tags:
+        - Locations
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          description: ID do local
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Local encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationResponse"
+              example:
+                success: true
+                location:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "Parque Central"
+                  description: "Local amplo com áreas verdes e eventos culturais."
+                  price: 25.5
+                  createdAt: "2026-08-05T12:00:00.000Z"
+                  updatedAt: "2026-08-05T12:00:00.000Z"
+        "404":
+          description: Local não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      summary: Atualizar local
+      description: Atualiza os dados de um local existente
+      operationId: updateLocation
+      tags:
+        - Locations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          description: ID do local a ser atualizado
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nome do local
+                  example: "Parque Central"
+                description:
+                  type: string
+                  description: Descrição do local
+                  example: "Local amplo com áreas verdes e eventos culturais."
+                price:
+                  type: number
+                  description: Preço associado ao local
+                  example: 25.5
+      responses:
+        "200":
+          description: Local atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationResponse"
+              example:
+                success: true
+                message: "Local atualizado com sucesso"
+                location:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  name: "Parque Central"
+                  description: "Local amplo com áreas verdes e eventos culturais."
+                  price: 25.5
+                  createdAt: "2026-08-05T12:00:00.000Z"
+                  updatedAt: "2026-08-05T12:00:00.000Z"
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Local não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Remover local
+      description: Remove um local existente
+      operationId: deleteLocation
+      tags:
+        - Locations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: locationId
+          in: path
+          required: true
+          description: ID do local a ser removido
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Local deletado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                success: true
+                message: "Local deletado com sucesso"
+        "404":
+          description: Local não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    LocationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do local
+        name:
+          type: string
+          description: Nome do local
+        description:
+          type: string
+          nullable: true
+          description: Descrição detalhada do local
+        price:
+          type: number
+          description: Preço do local
+        createdAt:
+          type: string
+          format: date-time
+          description: Data de criação do registro
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data da última atualização
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: Código de status HTTP
+          example: 404
+        message:
+          type: string
+          description: Mensagem de erro
+        error:
+          type: string
+          description: Tipo do erro
+          example: "Not Found"
+      required:
+        - statusCode
+        - message
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

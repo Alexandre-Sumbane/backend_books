@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import BookRoutes from "../http/routes/book.routes";
+import LocationRoutes from "@/http/routes/location.routes";
 import { swaggerSpec } from "../../swagger";
 import swaggerUi from "swagger-ui-express";
 import CategoryRoutes from "@/http/routes/category.routes";
@@ -16,6 +17,7 @@ app.use(morgan("dev"));
 
 app.use("/categories", CategoryRoutes);
 app.use("/books", BookRoutes);
+app.use("/locations", LocationRoutes);
 
 app.use("/uploads", express.static(uploadsRoot));
     

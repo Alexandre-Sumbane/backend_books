@@ -1,17 +1,16 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
-import { Ebook } from "./book";
-
 
 export interface CartItemModel {
     id: string;
+    cartId: string;
     bookId: string;
     quantity: number;
 }
 
 
 export interface CartItemDto 
-    extends Optional<CartItemModel, "id" | "quantity"> {}
+    extends Optional<CartItemModel, "id"> {}
 
 
 
@@ -20,6 +19,7 @@ export class CartItem
     implements CartItemModel
 {
     declare id: string;
+    declare cartId: string;
     declare bookId: string;
     declare quantity: number;
 }
@@ -33,6 +33,11 @@ CartItem.init(
             primaryKey: true,
             allowNull: false,
             defaultValue: DataTypes.UUIDV4,
+        },
+
+        cartId: {
+            type: DataTypes.UUID,
+            allowNull: false,
         },
 
         bookId: {
