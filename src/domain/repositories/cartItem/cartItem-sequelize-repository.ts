@@ -1,4 +1,5 @@
 import { CartItem, CartItemDto } from "@/domain/model/cartitem";
+import { CartItemRepository } from "./cartItem-repository";
 
 
 export class CartItemSequelizeRepository implements CartItemRepository{ 
@@ -25,7 +26,7 @@ export class CartItemSequelizeRepository implements CartItemRepository{
 
         return cartItem;
     }
-    async removeItem( cartId: string, bookId: string): Promise<void> {
+    async removeItem( cartId: string, bookId: string){
         const cartItem = await CartItem.findOne({
             where: {
                 cartId,

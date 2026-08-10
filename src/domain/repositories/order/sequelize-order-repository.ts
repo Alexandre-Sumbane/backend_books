@@ -4,7 +4,6 @@ import { OrderRepository } from "./order-repository";
 import sequelizeConnection from "@/infra/database/config/database";
 
 import { Order } from "@/domain/model/order";
-import th from "zod/v4/locales/th.js";
 
 export class SequelizeOrderRepository implements OrderRepository {
   async create(orderDto: CreateOrder) {
@@ -43,6 +42,7 @@ export class SequelizeOrderRepository implements OrderRepository {
   }
 
   async removeOrder(orderId: string, userId: string) {
+    
     const transaction = await sequelizeConnection.transaction();
 
     try {
@@ -62,7 +62,7 @@ export class SequelizeOrderRepository implements OrderRepository {
       });
 
       await transaction.commit();
-      
+
     } catch (error) {
       console.log("Erro ao remover Order:", error);
 

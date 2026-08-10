@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: Cart API
+  description: API para gerenciamento do carrinho de compras
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+tags:
+  - name: Cart
+    description: Operações relacionadas ao carrinho do usuário
+
+paths:
+  /carts/add:
+    post:
+      summary: Adicionar itens ao carrinho
+      description: Adiciona um ou mais itens ao carrinho do usuário autenticado.
+      operationId: addItemsToCart
+      tags:
+        - Cart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartRequest"
+            example:
+              items:
+                - bookId: "book-001"
+                  quantity: 2
+                  price: 29.9
+                - bookId: "book-002"
+                  quantity: 1
+                  price: 45.0
+      responses:
+        "200":
+          description: Itens adicionados ao carrinho com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartSuccessResponse"
+              example:
+                success: true
+                message: "Itens adicionados ao carrinho com sucesso!"
+                user:
+                  id: "cart-001"
+                  userId: "user-123"
+                  totalAmount: 59.8
+                  status: "pending"
+                  cartItems:
+                    - id: "item-001"
+                      cartId: "cart-001"
+                      bookId: "book-001"
+                      quantity: 2
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "Usuário não autenticado"
+        "400":
+          description: Dados inválidos fornecidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AddToCartRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Lista de itens a serem adicionados ao carrinho
+          items:
+            $ref: "#/components/schemas/CartItemInput"
+
+    CartItemInput:
+      type: object
+      required:
+        - bookId
+        - quantity
+      properties:
+        bookId:
+          type: string
+          description: ID do livro que será adicionado
+          example: "book-001"
+        quantity:
+          type: integer
+          minimum: 1
+          description: Quantidade do item
+          example: 2
+        price:
+          type: number
+          format: float
+          description: Preço unitário do item
+          example: 29.9
+
+    CartSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Itens adicionados ao carrinho com sucesso!"
+        user:
+          $ref: "#/components/schemas/CartResponse"
+
+    CartResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        userId:
+          type: string
+          example: "user-123"
+        totalAmount:
+          type: number
+          nullable: true
+          example: 59.8
+        status:
+          type: string
+          example: pending
+        cartItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItemResponse"
+
+    CartItemResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "item-001"
+        cartId:
+          type: string
+          example: "cart-001"
+        bookId:
+          type: string
+          example: "book-001"
+        quantity:
+          type: integer
+          example: 2
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Usuário não autenticado"

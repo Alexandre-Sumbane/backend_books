@@ -1,10 +1,14 @@
 import express from "express";
 import morgan from "morgan";
+
+import CategoryRoutes from "@/http/routes/category.routes";
 import BookRoutes from "../http/routes/book.routes";
 import LocationRoutes from "@/http/routes/location.routes";
+import CartRoutes from "@/http/routes/cart.routes";
+
 import { swaggerSpec } from "../../swagger";
 import swaggerUi from "swagger-ui-express";
-import CategoryRoutes from "@/http/routes/category.routes";
+
 import path from "path";
 
 const app = express();
@@ -18,6 +22,7 @@ app.use(morgan("dev"));
 app.use("/categories", CategoryRoutes);
 app.use("/books", BookRoutes);
 app.use("/locations", LocationRoutes);
+app.use("/carts", CartRoutes);
 
 app.use("/uploads", express.static(uploadsRoot));
     

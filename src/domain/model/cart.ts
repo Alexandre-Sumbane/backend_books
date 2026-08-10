@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
+import { CartItem } from "./cartitem";
 
 export enum CartStatus {
   pending = "pending",
@@ -58,3 +59,5 @@ Cart.init(
     timestamps: true,
   },
 );
+
+Cart.hasMany(CartItem, { as: "cartItems", foreignKey: "cartId" });
