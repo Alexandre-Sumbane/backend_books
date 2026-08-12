@@ -19,16 +19,16 @@ module.exports = {
     //   onDelete: "CASCADE",
     // });
 
-    await queryInterface.addColumn("OrderItems", "orderId", {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: "Orders",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
-    });
+    // await queryInterface.addColumn("OrderItems", "orderId", {
+    //   type: DataTypes.UUID,
+    //   allowNull: true,
+    //   references: {
+    //     model: "Orders",
+    //     key: "id",
+    //   },
+    //   onUpdate: "CASCADE",
+    //   onDelete: "CASCADE",
+    // });
 
     await queryInterface.changeColumn("Carts", "totalAmount", {
       type: DataTypes.DECIMAL(10, 2),
