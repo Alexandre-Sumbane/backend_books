@@ -8,16 +8,16 @@ module.exports = {
     // await queryInterface.removeColumn("Orders", "orderItemsId");
     // await queryInterface.removeColumn("Carts", "cartItemsId");
 
-    await queryInterface.addColumn("CartItems", "cartId", {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: "Carts",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
-    });
+    // await queryInterface.addColumn("CartItems", "cartId", {
+    //   type: DataTypes.UUID,
+    //   allowNull: true,
+    //   references: {
+    //     model: "Carts",
+    //     key: "id",
+    //   },
+    //   onUpdate: "CASCADE",
+    //   onDelete: "CASCADE",
+    // });
 
     await queryInterface.addColumn("OrderItems", "orderId", {
       type: DataTypes.UUID,
