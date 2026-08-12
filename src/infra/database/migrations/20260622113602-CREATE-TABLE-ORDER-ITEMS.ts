@@ -29,15 +29,6 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: true
       },
-      orderItemsId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: "OrderItems",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
       userId: {
         type: DataTypes.UUID,
         allowNull: false
