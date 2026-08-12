@@ -4,54 +4,42 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   async up(queryInterface: QueryInterface) {
-    await queryInterface.createTable("Orders", {
+    await queryInterface.createTable("OrderItems", {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
         defaultValue: DataTypes.UUIDV4,
       },
-      orderNumber: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-      },
-      totalAmount: {
-        type: DataTypes.DOUBLE,
-        allowNull: false
-      },
-      status: {
-        type: DataTypes.ENUM("pending", "shipped","delivered", "completed","cancelled"),
-        allowNull: false,
-        defaultValue: "pending"
-      },
-      shippingAddress: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      orderItemsId: {
+      bookId: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "CartItems",
+          model: "Ebooks",
           key: "id",
         },
         onDelete: "CASCADE",
       },
-      userId: {
-        type: DataTypes.UUID,
-        allowNull: false
-      },
-      checkedOut: {
-        type: DataTypes.BOOLEAN,
+      quantity: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: false
+        defaultValue: 1,
+      },
+      orderId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: "Orders",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
+
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
@@ -61,6 +49,7 @@ module.exports = {
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.dropTable("Orders");
+    await queryInterface.dropTable("OrderItems");
   },
 };
+

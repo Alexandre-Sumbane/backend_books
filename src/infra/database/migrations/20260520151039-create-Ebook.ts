@@ -45,6 +45,10 @@ export default {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
 
       rating: {
         type: DataTypes.FLOAT,
@@ -85,18 +89,14 @@ export default {
       },
 
       statePublisher: {
-        type: DataTypes.ENUM(
-          "pendent",
-          "published",
-          "blocked"
-        ),
+        type: DataTypes.ENUM("pendent", "published", "blocked"),
         defaultValue: "pendent",
         allowNull: true,
       },
 
       userId: {
         type: DataTypes.UUID,
-        allowNull: true
+        allowNull: true,
       },
 
       createdAt: {

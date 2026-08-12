@@ -4,36 +4,42 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   async up(queryInterface: QueryInterface) {
-    await queryInterface.createTable("Carts", {
+    await queryInterface.createTable("CartItems", {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
         defaultValue: DataTypes.UUIDV4,
       },
-      cartItemsId: {
+      bookId: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: "CartItems",
+          model: "Ebooks",
           key: "id",
         },
         onDelete: "CASCADE",
       },
-      userId: {
-        type: DataTypes.UUID,
-        allowNull: false
-      },
-      checkedOut: {
-        type: DataTypes.BOOLEAN,
+      quantity: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: false
+        defaultValue: 1,
+      },
+      cartId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: "Carts",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
+
       updatedAt: {
         allowNull: false,
         type: DataTypes.DATE,
@@ -43,6 +49,6 @@ module.exports = {
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.dropTable("Carts");
+    await queryInterface.dropTable("CartItems");
   },
 };
