@@ -5,30 +5,30 @@ import { QueryInterface, DataTypes } from "sequelize";
 module.exports = {
   async up(queryInterface: QueryInterface) {
 
-    // await queryInterface.removeColumn("Orders", "orderItemsId");
-    // await queryInterface.removeColumn("Carts", "cartItemsId");
+    await queryInterface.removeColumn("Orders", "orderItemsId");
+    await queryInterface.removeColumn("Carts", "cartItemsId");
 
-    // await queryInterface.addColumn("CartItems", "cartId", {
-    //   type: DataTypes.UUID,
-    //   allowNull: true,
-    //   references: {
-    //     model: "Carts",
-    //     key: "id",
-    //   },
-    //   onUpdate: "CASCADE",
-    //   onDelete: "CASCADE",
-    // });
+    await queryInterface.addColumn("CartItems", "cartId", {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Carts",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    });
 
-    // await queryInterface.addColumn("OrderItems", "orderId", {
-    //   type: DataTypes.UUID,
-    //   allowNull: true,
-    //   references: {
-    //     model: "Orders",
-    //     key: "id",
-    //   },
-    //   onUpdate: "CASCADE",
-    //   onDelete: "CASCADE",
-    // });
+    await queryInterface.addColumn("OrderItems", "orderId", {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Orders",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    });
 
     await queryInterface.changeColumn("Carts", "totalAmount", {
       type: DataTypes.DECIMAL(10, 2),
