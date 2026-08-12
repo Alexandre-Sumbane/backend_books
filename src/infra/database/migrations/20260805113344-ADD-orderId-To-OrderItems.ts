@@ -6,7 +6,7 @@ module.exports = {
   async up(queryInterface: QueryInterface) {
 
     // await queryInterface.removeColumn("Orders", "orderItemsId");
-    await queryInterface.removeColumn("Carts", "cartItemsId");
+    // await queryInterface.removeColumn("Carts", "cartItemsId");
 
     await queryInterface.addColumn("CartItems", "cartId", {
       type: DataTypes.UUID,
