@@ -30,7 +30,7 @@ module.exports = {
       onDelete: "CASCADE",
     });
 
-    await queryInterface.changeColumn("Carts", "totalAmount", {
+    await queryInterface.addColumn("Carts", "totalAmount", {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
     });
