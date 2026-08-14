@@ -1,0 +1,188 @@
+openapi: 3.0.0
+info:
+  title: Orders API
+  description: API para criação de pedidos
+  version: 1.0.0
+
+tags:
+  - name: Orders
+    description: Operações relacionadas aos pedidos do usuário
+
+paths:
+  /orders:
+    post:
+      summary: Criar um pedido
+      description: Cria um pedido a partir de um carrinho do usuário autenticado. O local de entrega é opcional.
+      operationId: createOrder
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+            example:
+              cartId: "123e4567-e89b-12d3-a456-426614174000"
+              locationId: "123e4567-e89b-12d3-a456-426614174001"
+      responses:
+        "200":
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateOrderSuccessResponse"
+              example:
+                success: true
+                message: "Itens adicionados ao carrinho com sucesso!"
+                order:
+                  id: "123e4567-e89b-12d3-a456-426614174002"
+                  orderNumber: "EBook-Order-2026-7-14-12-30-0"
+                  totalAmount: 84.9
+                  status: "pending"
+                  shippingAddress: "Campus UNITEC"
+                  userId: "123e4567-e89b-12d3-a456-426614174003"
+                  cartId: "123e4567-e89b-12d3-a456-426614174000"
+        "401":
+          description: Token de autenticação não fornecido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+              example:
+                message: "Token não fornecido"
+        "403":
+          description: Token de autenticação inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthErrorResponse"
+              example:
+                message: "Token inválido"
+        "404":
+          description: Carrinho ou local não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                cartNotFound:
+                  value:
+                    success: false
+                    message: "Carrinho nao encontrado"
+                locationNotFound:
+                  value:
+                    success: false
+                    message: "Local nao encontrado"
+        "500":
+          description: Erro interno ao criar o pedido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao adicionar itens ao criar order, tente novamente"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateOrderRequest:
+      type: object
+      required:
+        - cartId
+      properties:
+        cartId:
+          type: string
+          format: uuid
+          description: ID do carrinho usado para criar o pedido
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        locationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID do local de entrega. Se omitido, o pedido é criado sem custo e endereço de entrega.
+          example: "123e4567-e89b-12d3-a456-426614174001"
+
+    CreateOrderSuccessResponse:
+      type: object
+      required:
+        - success
+        - message
+        - order
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Itens adicionados ao carrinho com sucesso!"
+        order:
+          $ref: "#/components/schemas/Order"
+
+    Order:
+      type: object
+      required:
+        - id
+        - orderNumber
+        - totalAmount
+        - status
+        - userId
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderNumber:
+          type: string
+          description: Número único gerado para o pedido
+          example: "EBook-Order-2026-7-14-12-30-0"
+        totalAmount:
+          type: number
+          format: double
+          description: Total do carrinho somado ao custo de entrega, quando houver
+          example: 84.9
+        status:
+          type: string
+          enum: [pending, shipped, delivered, completed, cancelled]
+          example: pending
+        shippingAddress:
+          type: string
+          nullable: true
+          description: Nome do local de entrega
+          example: "Campus UNITEC"
+        userId:
+          type: string
+          format: uuid
+        cartId:
+          type: string
+          format: uuid
+          nullable: true
+
+    AuthErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "Token não fornecido"
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Carrinho nao encontrado"

@@ -7,20 +7,18 @@ export interface OrderItemDto {
 }
 
 export interface CreateOrder {
-    totalAmount?: number | null;
-    userId: string;
-    cartId?: string | null;
     orderNumber: string;
+    totalAmount: number;
+    userId: string;
+    cartId: string;
     shippingAddress?: string | null;
-    orderItems: OrderItemDto[];
 }
 
 
 export interface CreateOrderDto {
-
-    items: OrderItemDto[];
-
-    shippingAddress: string;
+    cartId: string;
+    locationId?: string;
+    userId: string;
 }
 
 
@@ -31,5 +29,4 @@ export interface OrderResponse {
     status: string;
     shippingAddress?: string | null;
     userId: string;
-    cartId?: string | null;
 }

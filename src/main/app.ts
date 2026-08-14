@@ -5,6 +5,7 @@ import CategoryRoutes from "@/http/routes/category.routes";
 import BookRoutes from "../http/routes/book.routes";
 import LocationRoutes from "@/http/routes/location.routes";
 import CartRoutes from "@/http/routes/cart.routes";
+import OrderRoutes from "@/http/routes/order.routes";
 
 import { swaggerSpec } from "../../swagger";
 import swaggerUi from "swagger-ui-express";
@@ -23,6 +24,7 @@ app.use("/categories", CategoryRoutes);
 app.use("/books", BookRoutes);
 app.use("/locations", LocationRoutes);
 app.use("/carts", CartRoutes);
+app.use("/orders", OrderRoutes);
 
 app.use("/uploads", express.static(uploadsRoot));
     

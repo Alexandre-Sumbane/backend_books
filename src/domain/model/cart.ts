@@ -12,7 +12,7 @@ export enum CartStatus {
 export interface CartAttributes {
   id: string;
   userId: string;
-  totalAmount?: number | null;
+  totalAmount: number;
   status: CartStatus;
   createdAt?: Date;
   updatedAt?: Date;
@@ -23,7 +23,7 @@ export interface CartDto extends Optional<CartAttributes, "id" | "status" | "cre
 export class Cart extends Model<CartAttributes, CartDto> implements CartAttributes {
   declare id: string;
   declare userId: string;
-  declare totalAmount?: number | null;
+  declare totalAmount: number;
   declare status: CartStatus;
   declare readonly createdAt?: Date;
   declare readonly updatedAt?: Date;

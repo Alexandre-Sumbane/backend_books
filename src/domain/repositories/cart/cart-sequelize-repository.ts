@@ -77,11 +77,11 @@ export class SequelizeCartRepository implements CartRepository {
     }
   }
 
-  async getUserCart(userId: string, status: string) {
+  async getUserCart(cartId: string, userId: string) {
     const cart = await Cart.findOne({
       where: {
         userId,
-        status,
+        id: cartId,
       },
       include: [
         {

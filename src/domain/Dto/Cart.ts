@@ -2,14 +2,14 @@ import { CartItemDto } from "./CartItem";
 
 export interface CartDto {
     userId: string;
-    totalAmount?: number | null;
+    totalAmount: number;
 }
 
 
 export interface CartResponse {
     id: string;
     userId: string;
-    totalAmount?: number | null;
+    totalAmount: number;
     status: string;
     cartItems?: CartItemDto[];
 }

@@ -1,71 +1,62 @@
-import { EbookResponse } from "@/domain/Dto/Book";
 import { CreateOrderDto } from "@/domain/Dto/order";
 import { CartRepository } from "@/domain/repositories/cart/cart-repository";
-import { EbookRepository } from "@/domain/repositories/ebook/ebook-repository";
+import { LocationRepository } from "@/domain/repositories/location/location-repository";
 import { OrderRepository } from "@/domain/repositories/order/order-repository";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 
 export class OrderUsecases {
   constructor(
-    private ebookRepository: EbookRepository,
+    private locationRepository: LocationRepository,
     private cartRepository: CartRepository,
     private orderRepository: OrderRepository,
   ) {}
 
-  async create(orderDto: CreateOrderDto, userId: string) {
-    const { items, shippingAddress } = orderDto;
+  async create(orderDto: CreateOrderDto) {
+      const {locationId, cartId, userId } = orderDto;
 
-    const books = new Map<string, EbookResponse>();
+      let deliveryAmount = 0;
+      let shippingAddress="";
 
-    for (const item of items) {
-      const book = await this.ebookRepository.findById(item.bookId);
+      if(locationId) {
 
-      if (!book) {
-        throw HttpExceptionFactory.notFound(`Ebook não encontrado!`);
+        const location = await this.locationRepository.findById(locationId);
+
+        if(!location) {
+          throw HttpExceptionFactory.notFound("Local nao encontrado");
+        }
+
+        deliveryAmount = location.price;
+        shippingAddress = location.name;
+
       }
 
-      if ((book.quantity ?? 0) < item.quantity) {
-        throw HttpExceptionFactory.conflict("Quantidade insuficiente!");
+      const cart = await this.cartRepository.getUserCart(cartId, userId);
+
+      if(!cart) {
+        throw HttpExceptionFactory.notFound("Carrinho nao encontrado");
       }
-      books.set(item.bookId, book);
-    }
 
-    const total = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
+      const totalAmount = Number(deliveryAmount) + Number(cart.totalAmount);
+      const orderNumber = this.createOrderNumber();
+    
 
-    const latestCart = await this.cartRepository.getUserCart(userId, "pending");
+      const order = await this.orderRepository.create({
+        userId,
+        cartId,
+        totalAmount,
+        shippingAddress,
+        orderNumber
+      });
 
-    if (!latestCart) {
-      throw HttpExceptionFactory.notFound("Carrinho nao encontrado!");
-    }
-
-    const orderNumber = Math.floor(Math.random() * 1000000).toString();
-
-    const order = await this.orderRepository.create({
-      userId,
-      totalAmount: total,
-      shippingAddress,
-      cartId: latestCart.id,
-      orderNumber,
-      orderItems: items.map((item) => ({
-        orderId: order.id,
-        bookId: item.bookId,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-    });
-
-    for (const item of items) {
-      const book = books.get(item.bookId)!;
-
-      await this.ebookRepository.updateQuantity(
-        book.id,
-        book.quantity! - item.quantity,
-      );
-    }
-
-    return order;
+      return order;
   }
+
+  private createOrderNumber() {
+
+    const date = new Date();
+
+    return `EBook-Order-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`
+
+  }
+    
 }
