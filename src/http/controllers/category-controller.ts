@@ -145,7 +145,7 @@ export class CategoryController {
     try {
       const categoryUsecase = MakeCategoryUsecase();
 
-      const categoryId = req.params.id as string;
+      const categoryId = req.params.categoryId as string;
 
       const category = await categoryUsecase.delete(categoryId);
 

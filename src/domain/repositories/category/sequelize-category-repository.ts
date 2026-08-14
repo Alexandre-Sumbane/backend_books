@@ -1,7 +1,7 @@
 import { CategoryRepository } from "./category-repository";
 import { Category } from "@/domain/model/category";
 import { CategoryDto } from "@/domain/Dto/category";
-import { Sequelize, Op } from "sequelize";
+import { Op } from "sequelize";
 
 
 export class SequelizeCategoriesRepository implements CategoryRepository {
@@ -56,7 +56,7 @@ export class SequelizeCategoriesRepository implements CategoryRepository {
         
         const categoryFound = await this.findById(categoryId);
 
-        await categoryFound?.destroy()
+        await categoryFound?.destroy();
     }
 
 
