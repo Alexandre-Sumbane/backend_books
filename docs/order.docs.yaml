@@ -1,18 +1,18 @@
 openapi: 3.0.0
 info:
   title: Orders API
-  description: API para criação de pedidos
+  description: API para criacao e consulta de pedidos
   version: 1.0.0
 
 tags:
   - name: Orders
-    description: Operações relacionadas aos pedidos do usuário
+    description: Operacoes relacionadas aos pedidos
 
 paths:
   /orders:
     post:
       summary: Criar um pedido
-      description: Cria um pedido a partir de um carrinho do usuário autenticado. O local de entrega é opcional.
+      description: Cria um pedido a partir de um carrinho pertencente ao usuario autenticado. O local de entrega e opcional.
       operationId: createOrder
       tags:
         - Orders
@@ -33,40 +33,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateOrderSuccessResponse"
-              example:
-                success: true
-                message: "Itens adicionados ao carrinho com sucesso!"
-                order:
-                  id: "123e4567-e89b-12d3-a456-426614174002"
-                  orderNumber: "EBook-Order-2026-7-14-12-30-0"
-                  totalAmount: 84.9
-                  status: "pending"
-                  shippingAddress: "Campus UNITEC"
-                  userId: "123e4567-e89b-12d3-a456-426614174003"
-                  cartId: "123e4567-e89b-12d3-a456-426614174000"
+                $ref: "#/components/schemas/CreateOrderResponse"
         "401":
-          description: Token de autenticação não fornecido
+          description: Usuario nao autenticado ou token ausente
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthErrorResponse"
+                $ref: "#/components/schemas/OrderErrorResponse"
               example:
-                message: "Token não fornecido"
+                success: false
+                message: "Usuario nao autenticado"
         "403":
-          description: Token de autenticação inválido
+          description: Token de autenticacao invalido
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthErrorResponse"
+                $ref: "#/components/schemas/OrderErrorResponse"
               example:
-                message: "Token inválido"
+                success: false
+                message: "Token invalido"
         "404":
-          description: Carrinho ou local não encontrado
+          description: Carrinho ou local nao encontrado
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/OrderErrorResponse"
               examples:
                 cartNotFound:
                   value:
@@ -81,10 +72,115 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/OrderErrorResponse"
               example:
                 success: false
                 message: "Ocorreu erro ao adicionar itens ao criar order, tente novamente"
+
+    get:
+      summary: Listar todos os pedidos
+      description: Retorna todos os pedidos, incluindo os itens de cada pedido. Disponivel apenas para usuarios administradores.
+      operationId: getAllOrders
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Pedidos encontrados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+        "401":
+          description: Usuario nao autenticado ou token ausente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Usuario nao autenticado"
+        "403":
+          description: Usuario sem permissao de administrador
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Usuario nao autorizado a listar todos os pedidos"
+        "404":
+          description: Nenhum pedido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Nenhuma pedido foi encontrado!"
+        "500":
+          description: Erro interno ao listar os pedidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao buscar pedidos, tente novamente"
+
+  /orders/user:
+    get:
+      summary: Listar pedidos do usuario autenticado
+      description: Retorna os pedidos do usuario presente no token, incluindo os itens de cada pedido.
+      operationId: getUserOrders
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Pedidos do usuario encontrados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+        "401":
+          description: Usuario nao autenticado ou token ausente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Usuario nao autenticado"
+        "403":
+          description: Token de autenticacao invalido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Token invalido"
+        "404":
+          description: Nenhum pedido encontrado para o usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Nenhuma pedido foi encontrado!"
+        "500":
+          description: Erro interno ao buscar os pedidos do usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao buscar pedidos do usuario, tente novamente"
 
 components:
   securitySchemes:
@@ -102,16 +198,15 @@ components:
         cartId:
           type: string
           format: uuid
-          description: ID do carrinho usado para criar o pedido
+          description: ID do carrinho que sera convertido em pedido
           example: "123e4567-e89b-12d3-a456-426614174000"
         locationId:
           type: string
           format: uuid
-          nullable: true
-          description: ID do local de entrega. Se omitido, o pedido é criado sem custo e endereço de entrega.
+          description: ID do local de entrega. Quando omitido, nao ha custo de entrega.
           example: "123e4567-e89b-12d3-a456-426614174001"
 
-    CreateOrderSuccessResponse:
+    CreateOrderResponse:
       type: object
       required:
         - success
@@ -127,6 +222,37 @@ components:
         order:
           $ref: "#/components/schemas/Order"
 
+    OrderListResponse:
+      type: object
+      required:
+        - success
+        - orders
+      properties:
+        success:
+          type: boolean
+          example: true
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderWithItems"
+          example:
+            - id: "123e4567-e89b-12d3-a456-426614174002"
+              orderNumber: "EBook-Order-2026-7-14-12-30-0"
+              totalAmount: 84.9
+              status: "pending"
+              shippingAddress: "Campus UNITEC"
+              userId: "123e4567-e89b-12d3-a456-426614174003"
+              cartId: "123e4567-e89b-12d3-a456-426614174000"
+              createdAt: "2026-08-15T12:30:00.000Z"
+              updatedAt: "2026-08-15T12:30:00.000Z"
+              orderItems:
+                - id: "123e4567-e89b-12d3-a456-426614174004"
+                  orderId: "123e4567-e89b-12d3-a456-426614174002"
+                  bookId: "123e4567-e89b-12d3-a456-426614174005"
+                  quantity: 2
+                  createdAt: "2026-08-15T12:30:00.000Z"
+                  updatedAt: "2026-08-15T12:30:00.000Z"
+
     Order:
       type: object
       required:
@@ -135,13 +261,15 @@ components:
         - totalAmount
         - status
         - userId
+        - createdAt
+        - updatedAt
       properties:
         id:
           type: string
           format: uuid
         orderNumber:
           type: string
-          description: Número único gerado para o pedido
+          description: Numero unico gerado para o pedido
           example: "EBook-Order-2026-7-14-12-30-0"
         totalAmount:
           type: number
@@ -155,7 +283,7 @@ components:
         shippingAddress:
           type: string
           nullable: true
-          description: Nome do local de entrega
+          description: Nome do local de entrega; vazio quando nenhum local e informado
           example: "Campus UNITEC"
         userId:
           type: string
@@ -164,17 +292,56 @@ components:
           type: string
           format: uuid
           nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
-    AuthErrorResponse:
+    OrderWithItems:
+      allOf:
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          required:
+            - orderItems
+          properties:
+            orderItems:
+              type: array
+              items:
+                $ref: "#/components/schemas/OrderItem"
+
+    OrderItem:
       type: object
       required:
-        - message
+        - id
+        - orderId
+        - bookId
+        - quantity
+        - createdAt
+        - updatedAt
       properties:
-        message:
+        id:
           type: string
-          example: "Token não fornecido"
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        bookId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
-    ErrorResponse:
+    OrderErrorResponse:
       type: object
       required:
         - success

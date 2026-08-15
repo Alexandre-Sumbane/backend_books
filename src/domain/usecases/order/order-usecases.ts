@@ -51,6 +51,30 @@ export class OrderUsecases {
       return order;
   }
 
+   async getAllOrders(){
+
+    const orders = await this.orderRepository.getAllOrders();
+
+    if(!orders || orders.length === 0) {
+      throw HttpExceptionFactory.notFound("Nenhuma pedido foi encontrado!");
+    }
+
+    return orders
+
+  }
+
+  async getUserOrders(userId: string){
+
+    const orders = await this.orderRepository.getUserOrders(userId);
+
+    if(!orders || orders.length === 0) {
+      throw HttpExceptionFactory.notFound("Nenhuma pedido foi encontrado!");
+    }
+
+    return orders
+
+  }
+
   private createOrderNumber() {
 
     const date = new Date();
@@ -58,5 +82,7 @@ export class OrderUsecases {
     return `EBook-Order-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`
 
   }
+
+
     
 }

@@ -4,6 +4,8 @@ import { OrderRepository } from "./order-repository";
 import sequelizeConnection from "@/infra/database/config/database";
 
 import { Order } from "@/domain/model/order";
+import { OrderItem } from "@/domain/model/orderitem";
+import { CartItem } from "@/domain/model/cartitem";
 
 export class SequelizeOrderRepository implements OrderRepository {
   async create(orderDto: CreateOrder) {
@@ -13,6 +15,26 @@ export class SequelizeOrderRepository implements OrderRepository {
       const order = await Order.create(orderDto, {
         transaction,
       });
+
+      const cartItems = await CartItem.findAll({
+        where: {
+          cartId: orderDto.cartId,
+        },
+        transaction,
+      });
+
+      for (const cartItem of cartItems) {
+        await OrderItem.create(
+          {
+            orderId: order.id,
+            bookId: cartItem.bookId,
+            quantity: cartItem.quantity,
+          },
+          {
+            transaction,
+          },
+        );
+      }
 
       await transaction.commit();
 
@@ -26,12 +48,34 @@ export class SequelizeOrderRepository implements OrderRepository {
     }
   }
 
-  async getUserOrder(userId: string, status: string) {
-    const order = await Order.findOne({
+  async getAllOrders() {
+    const orders = await Order.findAll({
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+        },
+      ],
+    });
+
+    if (!orders) {
+      return null;
+    }
+
+    return orders;
+  }
+
+  async getUserOrders(userId: string) {
+    const order = await Order.findAll({
       where: {
-        userId,
-        status,
+        userId
       },
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+        },
+      ],
     });
 
     if (!order) {
