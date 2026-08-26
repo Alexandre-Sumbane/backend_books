@@ -1,0 +1,136 @@
+tags:
+  - name: Sellers
+    description: Operacoes do vendedor
+
+paths:
+  /seller/earnings:
+    get:
+      summary: Consultar ganhos do vendedor
+      description: Retorna o total de ganhos do vendedor autenticado.
+      operationId: getSellerEarnings
+      tags:
+        - Sellers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Ganhos consultados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EarningsResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "403":
+          description: Usuario nao autorizado como vendedor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "500":
+          description: Erro interno ao consultar ganhos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+
+  /seller/withdrawal/{withdrawalId}:
+    put:
+      summary: Atualizar status de um saque
+      operationId: updateSellerWithdrawalStatus
+      tags:
+        - Sellers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: withdrawalId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalStatusRequest"
+            example:
+              status: completed
+              reason: "Saque processado"
+      responses:
+        "200":
+          description: Status do saque atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "403":
+          description: Usuario nao autorizado como vendedor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "500":
+          description: Erro interno ao atualizar o saque
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+
+components:
+  schemas:
+    EarningsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        earnings:
+          type: number
+          format: double
+          example: 1250.5
+
+    WithdrawalStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: completed
+        reason:
+          type: string
+          example: "Saque processado"
+
+    WithdrawalResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Status de saque actualizado com sucesso!"
+        earnings:
+          type: object
+          additionalProperties: true
+
+    SellerErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string

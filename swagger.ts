@@ -13,8 +13,7 @@ const options = {
     },
     servers: [
       {
-        // url: "https://backend.unitec.co.mz",
-        url: `${env.APP_URL} || http://localhost:5203`
+        url: env.APP_URL || "http://localhost:3333",
       },
     ],
   },

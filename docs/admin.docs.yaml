@@ -1,0 +1,96 @@
+tags:
+  - name: Admin
+    description: Operacoes administrativas
+
+paths:
+  /admin/withdrawal/{withdrawalId}:
+    put:
+      summary: Atualizar status de um pedido de saque
+      operationId: updateAdminWithdrawalStatus
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: withdrawalId
+          in: path
+          required: true
+          description: ID do pedido de saque
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminWithdrawalStatusRequest"
+            example:
+              withdrawalId: "123e4567-e89b-12d3-a456-426614174000"
+              status: completed
+              reason: "Pedido aprovado"
+      responses:
+        "200":
+          description: Status do pedido alterado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminWithdrawalResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "403":
+          description: Usuario nao autorizado como administrador
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "500":
+          description: Erro interno ao alterar o pedido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+
+components:
+  schemas:
+    AdminWithdrawalStatusRequest:
+      type: object
+      required:
+        - withdrawalId
+        - status
+      properties:
+        withdrawalId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: completed
+        reason:
+          type: string
+          example: "Pedido aprovado"
+
+    AdminWithdrawalResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Status do pedido alterado com sucesso!"
+        earnings:
+          type: object
+          additionalProperties: true
+
+    AdminErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string

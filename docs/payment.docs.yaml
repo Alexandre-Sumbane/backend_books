@@ -1,0 +1,149 @@
+tags:
+  - name: Payments
+    description: Operacoes relacionadas aos pagamentos
+
+paths:
+  /payments/pay:
+    post:
+      summary: Criar pagamento de um pedido
+      description: Cria um pagamento e inicia a cobranca via carteira digital.
+      operationId: createPayment
+      tags:
+        - Payments
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+            example:
+              paymentMethod: mpesa
+              phoneNumber: "841234567"
+              orderId: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "201":
+          description: Pagamento criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentCreatedResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentErrorResponse"
+              example:
+                success: false
+                message: "Usuario nao autenticado"
+        "404":
+          description: Pedido nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentErrorResponse"
+        "409":
+          description: Pagamento nao criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentErrorResponse"
+        "500":
+          description: Erro interno ao criar pagamento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentErrorResponse"
+
+components:
+  schemas:
+    CreatePaymentRequest:
+      type: object
+      required:
+        - paymentMethod
+        - orderId
+      properties:
+        paymentMethod:
+          type: string
+          enum: [mpesa, emola, mkesh, bank]
+          example: mpesa
+        phoneNumber:
+          type: string
+          description: Numero usado pela carteira digital
+          example: "841234567"
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+
+    PaymentCreatedResponse:
+      type: object
+      required:
+        - success
+        - message
+        - payment
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Pagamento criado com sucesso!"
+        payment:
+          type: object
+          properties:
+            digitalWallet:
+              type: object
+              description: Resultado da transacao na carteira digital
+              properties:
+                order:
+                  type: object
+                  additionalProperties: true
+                payment:
+                  $ref: "#/components/schemas/Payment"
+                mpesa:
+                  type: object
+                  additionalProperties: true
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        paymentMethod:
+          type: string
+          enum: [mpesa, emola, mkesh, bank]
+        amount:
+          type: number
+          format: double
+        status:
+          type: string
+          enum: [pending, processing, completed, cancelled, failed, blocked]
+        transactionDate:
+          type: string
+          format: date-time
+        reference:
+          type: string
+          nullable: true
+        orderId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        phoneNumber:
+          type: string
+          nullable: true
+
+    PaymentErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Pagamento nao criado!"

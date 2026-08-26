@@ -135,7 +135,7 @@ paths:
 
     get:
       summary: Listar todos os ebooks
-      descrição: Retorna uma lista com todos os ebooks cadastrados
+      description: Retorna uma lista com todos os ebooks cadastrados
       operationId: getAllEbooks
       tags:
         - Ebooks
