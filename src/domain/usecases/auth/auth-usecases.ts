@@ -10,6 +10,7 @@ export async function userIsAssociadoAndBookSeller(userId: string, token: string
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        timeout: 5000,
       }
     );
     console.log("User data:", data.user);

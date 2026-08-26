@@ -3,11 +3,12 @@ import { HttpExceptionFactory } from "../../../../helpers/HttpExceptionFactory";
 import { EbookDto, EbookResponse } from "@/domain/Dto/Book";
 
 import { Request } from "express";
+import { EbookFormat } from "@/domain/model/book";
 
 export class EBookUsecases {
   constructor(private ebookRepository: EbookRepository) {}
   async create(book: EbookDto, req: Request): Promise<EbookResponse> {
-    const files = req.files as {
+    const files = (req.files ?? {}) as {
       cover?: Express.Multer.File[];
       file?: Express.Multer.File[];
     };
@@ -15,8 +16,17 @@ export class EBookUsecases {
     const cover = files.cover?.[0];
     const pdf = files.file?.[0];
 
-    if (!cover || !pdf) {
-      throw HttpExceptionFactory.badRequest("Nenhum ficheiro foi enviado!");
+    if (!cover) {
+      throw HttpExceptionFactory.badRequest("Capa do livro nao enviada!");
+    }
+
+    const format = String(book.format).toLowerCase();
+    const isPdf = format === "pdf" || format === String(EbookFormat.pdf);
+
+    if (isPdf) {
+      if (!pdf) {
+        throw HttpExceptionFactory.badRequest("Nenhum ficheiro foi enviado!");
+      }
     }
 
     const bookFound = await this.ebookRepository.findByCode(book.code);
@@ -27,7 +37,7 @@ export class EBookUsecases {
       );
     }
 
-    book.userId = req.user ? req.user.userId : "";
+    book.sellerId = req.user ? req.user.userId : "";
 
     const newBook = await this.ebookRepository.create(book, cover, pdf);
 
@@ -66,8 +76,8 @@ export class EBookUsecases {
     return book;
   }
 
-  async findBySeller(userId: string): Promise<EbookResponse[]> {
-    const book = await this.ebookRepository.findBySeller(userId);
+  async findBySeller(sellerId: string): Promise<EbookResponse[]> {
+    const book = await this.ebookRepository.findBySeller(sellerId);
 
     if (!book) {
       throw HttpExceptionFactory.notFound("Livro nao encontrado!");

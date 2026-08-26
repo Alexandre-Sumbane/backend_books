@@ -1,25 +1,37 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelizeConnection from '@/infra/database/config/database';
 
-enum PaymentMethod {
-  mpesa,
-  emola,
-  mkesh,
-  bank
+export enum PaymentMethod {
+  mpesa = "mpesa",
+  emola = "emola",
+  bank = "bank",
+  mkesh = "mkesh",
+}
+
+export enum PaymentStatus {
+  pending = "pending",
+  processing = "processing",
+  completed = "completed",
+  cancelled = "cancelled",
+  failed = "failed",
+  blocked = "blocked",
 }
 
 export interface PaymentAttributes {
   id: string;
-  userId: string;
-  ebookId: string;
-  pricePaid: number;
   paymentMethod: PaymentMethod;
+  amount: number;
+  status: PaymentStatus;
   transactionDate: Date;
-  status: number;
-  phoneNumber: number
+  reference?: string;
+  reason?: string;
+  shippingAddress?: string;
+  orderId: string;
+  userId: string;
+  phoneNumber?: string
 }
 export interface PaymentInput
-  extends Optional<PaymentAttributes, 'id'> {}
+  extends Optional<PaymentAttributes, 'id' | 'status'> {}
 export interface PaymentOutput
   extends Required<PaymentAttributes> {}
 
@@ -29,12 +41,15 @@ export class Payment extends
 {
   declare id: string;
   declare userId: string;
-  declare ebookId: string;
-  declare pricePaid: number;
+  declare orderId: string;
+  declare amount: number;
   declare paymentMethod: PaymentMethod;
+  declare reference?: string;
   declare transactionDate: Date;
-  declare status: number;
-  declare phoneNumber:number
+  declare status: PaymentStatus;
+  declare phoneNumber?: string
+  declare reason?: string;
+  declare shippingAddress?: string;
 
   declare createdAt?: Date;
   declare updatedAt?: Date;
@@ -51,16 +66,11 @@ Payment.init({
     type: DataTypes.UUID,
     allowNull: false,
   },
-  ebookId: {
+  orderId: {
     type: DataTypes.UUID,
-    allowNull: false,
-    references: {
-        model: 'eBooks',
-      key: 'id'
-    },
-    onDelete: 'CASCADE'
+    allowNull: false
   },
-  pricePaid: {
+  amount: {
     type: DataTypes.DECIMAL,
     allowNull: false,
   },
@@ -68,21 +78,34 @@ Payment.init({
     type: DataTypes.ENUM('mpesa', 'emola', 'mkesh', 'bank'),
     allowNull: false
   },
+  reference: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   transactionDate: {
     type: DataTypes.DATE,
     allowNull: true
   },
   status: {
-    type: DataTypes.INTEGER,
-    defaultValue: 200,
+    type: DataTypes.ENUM('pending', 'processing', 'completed', 'cancelled', 'failed', 'blocked'),
+    allowNull: false,
+    defaultValue: 'pending'
+  },
+  reason: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  shippingAddress: {
+    type: DataTypes.STRING,
+    allowNull: true
   },
   phoneNumber: {
     type: DataTypes.STRING,
+    allowNull: true
   },
 }, {
     timestamps: true,
     sequelize: sequelizeConnection,
-    paranoid: true,
     modelName: "Payment",
     tableName: 'Payments',
 });

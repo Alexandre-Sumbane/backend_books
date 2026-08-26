@@ -1,14 +1,17 @@
 import sequelizeConnection from '@/infra/database/config/database'
 import { DataTypes, Model, type Optional } from 'sequelize'
+import { PaymentMethod } from './payment'
 
 export interface DigitalWalletAttributes {
   id: string
+  type?: PaymentMethod
   amount: number
-  transactionReference: string
-  thirdPartyReference: string
+  transactionReference?: string
+  thirdPartyReference?: string
   userId: string
-  responseDescription: string
-  phoneNumber: number
+  responseDescription?: string
+  responseCode?: string
+  phoneNumber: string;
   paymentId: string;
 }
 
@@ -17,12 +20,14 @@ export interface DigitalWalletOutput extends Required<DigitalWalletAttributes> {
 
 export class DigitalWallet extends Model<DigitalWalletAttributes, DigitalWalletInput> implements DigitalWalletAttributes {
   declare id: string
+  declare type?: PaymentMethod
   declare amount: number
-  declare transactionReference: string
-  declare thirdPartyReference: string
+  declare transactionReference?: string
+  declare thirdPartyReference?: string
   declare userId: string
-  declare responseDescription: string
-  declare phoneNumber: number;
+  declare responseDescription?: string
+  declare responseCode?: string
+  declare phoneNumber: string;
   declare paymentId: string;
 }
 
@@ -34,18 +39,22 @@ DigitalWallet.init(
       allowNull: false,
       primaryKey: true,
     },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     amount: {
       type: DataTypes.DECIMAL,
       allowNull: false,
     },
     transactionReference: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     thirdPartyReference: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     userId: {
@@ -65,15 +74,18 @@ DigitalWallet.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    responseCode: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     phoneNumber: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.STRING,
       allowNull: false,
     }
   },
   {
     timestamps: true,
     sequelize: sequelizeConnection,
-    paranoid: true,
     tableName: 'digitalWallets',
   },
 )

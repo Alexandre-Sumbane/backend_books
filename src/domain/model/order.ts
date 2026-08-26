@@ -57,6 +57,7 @@ Order.init(
     status: {
       type: DataTypes.ENUM(
         "pending",
+        "processing",
         "shipped",
         "delivered",
         "completed",

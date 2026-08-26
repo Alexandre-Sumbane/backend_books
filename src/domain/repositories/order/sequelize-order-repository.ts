@@ -1,4 +1,4 @@
-import { CreateOrder, OrderResponse } from "@/domain/Dto/order";
+import { CreateOrder, OrderResponse, UpdateStatusDto } from "@/domain/Dto/order";
 import { OrderRepository } from "./order-repository";
 
 import sequelizeConnection from "@/infra/database/config/database";
@@ -6,6 +6,7 @@ import sequelizeConnection from "@/infra/database/config/database";
 import { Order } from "@/domain/model/order";
 import { OrderItem } from "@/domain/model/orderitem";
 import { CartItem } from "@/domain/model/cartitem";
+import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 
 export class SequelizeOrderRepository implements OrderRepository {
   async create(orderDto: CreateOrder) {
@@ -48,6 +49,26 @@ export class SequelizeOrderRepository implements OrderRepository {
     }
   }
 
+    async getOrderById(orderId: string) {
+    const order = await Order.findOne({
+      where: {
+        id: orderId
+      },
+      include: [
+        {
+          model: OrderItem,
+          as: "orderItems",
+        },
+      ],
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    return order;
+  }
+
   async getAllOrders() {
     const orders = await Order.findAll({
       include: [
@@ -64,6 +85,47 @@ export class SequelizeOrderRepository implements OrderRepository {
 
     return orders;
   }
+
+ async updateStatus(
+  item: UpdateStatusDto,
+  orderId: string
+): Promise<OrderResponse> {
+  const transaction = await sequelizeConnection.transaction();
+
+  try {
+
+    const [updated] = await Order.update(
+      {
+        status: item.status,
+      },
+      {
+        where: {
+          id: orderId,
+        },
+        transaction,
+      }
+    );
+
+    if (updated === 0) {
+      await transaction.rollback();
+
+      throw HttpExceptionFactory.notFound(
+        "Order not found!"
+      );
+    }
+
+    const order = await Order.findByPk(orderId, {
+      transaction,
+    });
+
+    await transaction.commit();
+
+    return order as OrderResponse;
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
 
   async getUserOrders(userId: string) {
     const order = await Order.findAll({

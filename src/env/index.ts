@@ -13,6 +13,7 @@ const envSchema = z.object({
     DBPORT: z.coerce.number(),
     DBDIALECT: z.string(),
     AUTH_SERVICE_URL: z.string(),
+    PAYMENT_SERVICE_URL: z.string(),
     JWT_SECRET: z.string(),
     APP_URL: z.string().optional(),
 });

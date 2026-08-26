@@ -58,6 +58,54 @@ export class SequelizeEbooksRepository implements EbookRepository {
     }
   }
 
+   async createNewBook(
+    data: EbookDto,
+    cover?: Express.Multer.File,
+    pdf?: Express.Multer.File,
+  ) {
+    const transaction = await sequelizeConnection.transaction();
+
+    try {
+      const ebook = await Ebook.create(data, {
+        transaction,
+      });
+
+      if (cover) {
+        await CoverImage.create(
+          {
+            ebookId: ebook.id,
+            fileName: cover.filename,
+            originalName: cover.originalname,
+          },
+          {
+            transaction,
+          },
+        );
+      }
+
+      if (pdf) {
+        await EbookFile.create(
+          {
+            ebookId: ebook.id,
+            fileName: pdf.filename,
+            originalName: pdf.originalname,
+          },
+          {
+            transaction,
+          },
+        );
+      }
+
+      await transaction.commit();
+
+      return ebook;
+    } catch (error) {
+      await transaction.rollback();
+
+      throw error;
+    }
+  }
+
   async findById(ebookId: string) {
     const ebook = await Ebook.findOne({
       where: {

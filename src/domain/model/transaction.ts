@@ -1,76 +1,85 @@
-import { DataTypes, Model, Optional } from "sequelize";
-import sequelizeConnection from "@/infra/database/config/database";
+import { DataTypes, Model, Optional } from 'sequelize';
+import sequelizeConnection from '@/infra/database/config/database';
 
 export enum TransactionType {
-  sell = "sell",
-  refund = "refund",
+  sale = "sale",
   withdrawal = "withdrawal",
+  refund = "refund",
 }
 
-export interface TransactionAttributes {
+export enum TransactionStatus {
+  pending = "pending",
+  processing = "processing",
+  confirmed = "confirmed",
+  failed = "failed",
+}
+
+export interface TransactionAttriutes {
   id: string;
-  bookId?: string;
+  type: TransactionType;
   amount: number;
+  status: TransactionStatus;
+  bookId: string;
   userId?: string;
   sellerId?: string;
-  type: TransactionType;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
-
 export interface TransactionInput
-  extends Optional<
-    TransactionAttributes,
-    "id" | "bookId" | "userId" | "sellerId"
-  > {}
+  extends Optional<TransactionAttriutes, 'id' | 'status'> {}
+export interface TransactionOutput
+  extends Required<TransactionAttriutes> {}
 
-export class Transaction
-  extends Model<TransactionAttributes, TransactionInput>
-  implements TransactionAttributes
+export class Transaction extends 
+    Model<TransactionAttriutes, TransactionInput> 
+    implements TransactionAttriutes 
 {
   declare id: string;
-  declare bookId?: string;
+  declare type: TransactionType;
   declare amount: number;
+  declare status: TransactionStatus;
+  declare bookId: string;
   declare userId?: string;
   declare sellerId?: string;
-  declare type: TransactionType;
-  declare readonly createdAt?: Date;
-  declare readonly updatedAt?: Date;
+
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
 }
 
-Transaction.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
-      primaryKey: true,
-    },
-    bookId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
-    amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
-    sellerId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-    },
-    type: {
-      type: DataTypes.ENUM("sell", "refund", "withdrawal"),
-      allowNull: false,
-    },
+Transaction.init({
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
+    primaryKey: true,
   },
-  {
+  bookId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  userId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  sellerId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+  },
+  type: {
+    type: DataTypes.ENUM("sell", "refund", "withdrawal"),
+    allowNull: false,
+  },
+  status: {
+    type: DataTypes.ENUM("pending", "processing", "confirmed", "failed"),
+    allowNull: false,
+    defaultValue: TransactionStatus.pending,
+  },
+  
+}, {
+    timestamps: true,
     sequelize: sequelizeConnection,
     modelName: "Transaction",
-    tableName: "Transactions",
-    timestamps: true,
-  },
-);
+    tableName: 'Transactions',
+});

@@ -1,3 +1,4 @@
+import { OrderStatus } from "../model/order";
 
 export interface OrderItemDto {
     orderId: string;
@@ -19,6 +20,10 @@ export interface CreateOrderDto {
     cartId: string;
     locationId?: string;
     userId: string;
+}
+
+export interface UpdateStatusDto {
+    status: OrderStatus;
 }
 
 
