@@ -18,7 +18,11 @@ export interface CreateOrder {
 
 export interface CreateOrderDto {
     cartId: string;
-    locationId?: string;
+    delivery?: {
+        clientName: string;
+        phoneNumber: string;
+        locationId?: string;
+    };
     userId: string;
 }
 

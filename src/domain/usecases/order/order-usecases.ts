@@ -1,5 +1,6 @@
 import { CreateOrderDto } from "@/domain/Dto/order";
 import { CartRepository } from "@/domain/repositories/cart/cart-repository";
+import { DeliveryRepository } from "@/domain/repositories/delivery/delivery-repository";
 import { LocationRepository } from "@/domain/repositories/location/location-repository";
 import { OrderRepository } from "@/domain/repositories/order/order-repository";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
@@ -9,80 +10,86 @@ export class OrderUsecases {
     private locationRepository: LocationRepository,
     private cartRepository: CartRepository,
     private orderRepository: OrderRepository,
+    private deliveryRepository: DeliveryRepository,
   ) {}
 
   async create(orderDto: CreateOrderDto) {
-      const {locationId, cartId, userId } = orderDto;
+    const { delivery, cartId, userId } = orderDto;
 
-      let deliveryAmount = 0;
-      let shippingAddress="";
+    let deliveryAmount = 0;
+    let shippingAddress = "";
+    let deliveryData;
+    let location;
 
-      if(locationId) {
+    if (delivery?.locationId) {
+      const { locationId } = delivery;
 
-        const location = await this.locationRepository.findById(locationId);
+      location = await this.locationRepository.findById(locationId);
 
-        if(!location) {
-          throw HttpExceptionFactory.notFound("Local nao encontrado");
-        }
-
-        deliveryAmount = location.price;
-        shippingAddress = location.name;
-
+      if (!location) {
+        throw HttpExceptionFactory.notFound("Local nao encontrado");
       }
 
-      const cart = await this.cartRepository.getUserCart(cartId, userId);
+      deliveryAmount = location.price;
+      shippingAddress = location.name;
+    }
 
-      if(!cart) {
-        throw HttpExceptionFactory.notFound("Carrinho nao encontrado");
-      }
+    const cart = await this.cartRepository.getUserCart(cartId, userId);
 
-      const totalAmount = Number(deliveryAmount) + Number(cart.totalAmount);
-      const orderNumber = this.createOrderNumber();
-    
+    if (!cart) {
+      throw HttpExceptionFactory.notFound("Carrinho nao encontrado");
+    }
 
-      const order = await this.orderRepository.create({
-        userId,
-        cartId,
-        totalAmount,
+    const totalAmount = Number(deliveryAmount) + Number(cart.totalAmount);
+    const orderNumber = this.createOrderNumber();
+
+    const order = await this.orderRepository.create({
+      userId,
+      cartId,
+      totalAmount,
+      shippingAddress,
+      orderNumber,
+    });
+
+    if (delivery) {
+      deliveryData = await this.deliveryRepository.create({
         shippingAddress,
-        orderNumber
+        clientName: delivery.clientName,
+        phoneNumber: delivery.phoneNumber,
+        estimatedDeliveryTime: location?.estimatedTime,
+        orderId: order.id,
       });
+    }
 
-      return order;
+    return {
+      order,
+      delivery: deliveryData,
+    };
   }
 
-   async getAllOrders(){
-
+  async getAllOrders() {
     const orders = await this.orderRepository.getAllOrders();
 
-    if(!orders || orders.length === 0) {
+    if (!orders || orders.length === 0) {
       throw HttpExceptionFactory.notFound("Nenhuma pedido foi encontrado!");
     }
 
-    return orders
-
+    return orders;
   }
 
-  async getUserOrders(userId: string){
-
+  async getUserOrders(userId: string) {
     const orders = await this.orderRepository.getUserOrders(userId);
 
-    if(!orders || orders.length === 0) {
+    if (!orders || orders.length === 0) {
       throw HttpExceptionFactory.notFound("Nenhuma pedido foi encontrado!");
     }
 
-    return orders
-
+    return orders;
   }
 
   private createOrderNumber() {
-
     const date = new Date();
 
-    return `EBook-Order-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`
-
+    return `EBook-Order-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
   }
-
-
-    
 }

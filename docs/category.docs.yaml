@@ -172,7 +172,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-    patch:
+    put:
       summary: Atualizar categoria
       description: Atualiza os dados de uma categoria existente
       operationId: updateCategory

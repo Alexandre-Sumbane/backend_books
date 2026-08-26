@@ -9,6 +9,7 @@ export interface LocationAttributes {
   name: string;
   description?: string;
   price: number;
+  estimatedTime?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -21,6 +22,7 @@ export class Location
   declare name: string;
   declare description?: string;
   declare price: number;
+  declare estimatedTime?: number;
   declare readonly createdAt?: Date;
   declare readonly updatedAt?: Date;
 }
@@ -44,6 +46,10 @@ Location.init(
     price: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    estimatedTime: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
   },
   {

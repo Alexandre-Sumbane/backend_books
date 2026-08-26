@@ -26,7 +26,10 @@ paths:
               $ref: "#/components/schemas/CreateOrderRequest"
             example:
               cartId: "123e4567-e89b-12d3-a456-426614174000"
-              locationId: "123e4567-e89b-12d3-a456-426614174001"
+              delivery:
+                clientName: "Maria Silva"
+                phoneNumber: "841234567"
+                locationId: "123e4567-e89b-12d3-a456-426614174001"
       responses:
         "200":
           description: Pedido criado com sucesso
@@ -200,11 +203,24 @@ components:
           format: uuid
           description: ID do carrinho que sera convertido em pedido
           example: "123e4567-e89b-12d3-a456-426614174000"
-        locationId:
-          type: string
-          format: uuid
-          description: ID do local de entrega. Quando omitido, nao ha custo de entrega.
-          example: "123e4567-e89b-12d3-a456-426614174001"
+        delivery:
+          type: object
+          description: Dados opcionais da entrega.
+          required:
+            - clientName
+            - phoneNumber
+          properties:
+            clientName:
+              type: string
+              example: "Maria Silva"
+            phoneNumber:
+              type: string
+              example: "841234567"
+            locationId:
+              type: string
+              format: uuid
+              description: ID do local de entrega. Quando omitido, nao ha custo de entrega.
+              example: "123e4567-e89b-12d3-a456-426614174001"
 
     CreateOrderResponse:
       type: object
@@ -278,7 +294,7 @@ components:
           example: 84.9
         status:
           type: string
-          enum: [pending, shipped, delivered, completed, cancelled]
+          enum: [pending, processing, shipped, delivered, completed, cancelled]
           example: pending
         shippingAddress:
           type: string

@@ -44,10 +44,16 @@ paths:
                   type: number
                   description: Preço associado ao local
                   example: 25.5
+                estimatedTime:
+                  type: integer
+                  minimum: 1
+                  description: Tempo estimado de entrega em minutos
+                  example: 45
             example:
               name: "Parque Central"
               description: "Local amplo com áreas verdes e eventos culturais."
               price: 25.5
+              estimatedTime: 45
       responses:
         "201":
           description: Local criado com sucesso
@@ -105,6 +111,7 @@ paths:
                     name: "Parque Central"
                     description: "Local amplo com áreas verdes e eventos culturais."
                     price: 25.5
+                    estimatedTime: 45
                     createdAt: "2026-08-05T12:00:00.000Z"
                     updatedAt: "2026-08-05T12:00:00.000Z"
         "404":
@@ -204,6 +211,11 @@ paths:
                   type: number
                   description: Preço associado ao local
                   example: 25.5
+                estimatedTime:
+                  type: integer
+                  minimum: 1
+                  description: Tempo estimado de entrega em minutos
+                  example: 45
       responses:
         "200":
           description: Local atualizado com sucesso
@@ -304,6 +316,11 @@ components:
         price:
           type: number
           description: Preço do local
+        estimatedTime:
+          type: integer
+          minimum: 1
+          description: Tempo estimado de entrega em minutos
+          example: 45
         createdAt:
           type: string
           format: date-time

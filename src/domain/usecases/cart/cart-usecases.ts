@@ -88,4 +88,14 @@ export class CartUsecases {
 
     return cart;
   }
+
+  async getCart(cartId: string, userId: string) {
+    const cart = await this.cartRepository.getUserCart( cartId, userId);
+
+    if (!cart) {
+      throw HttpExceptionFactory.notFound("Carrinho nao encontrado");
+    }
+
+    return cart;
+  }
 }

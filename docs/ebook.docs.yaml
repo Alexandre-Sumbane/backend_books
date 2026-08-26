@@ -20,6 +20,8 @@ paths:
       operationId: createEbook
       tags:
         - Ebooks
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:

@@ -78,6 +78,66 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /carts/{cartId}:
+    get:
+      summary: Consultar carrinho por ID
+      description: Retorna o carrinho informado quando ele pertence ao usuario autenticado.
+      operationId: getCart
+      tags:
+        - Cart
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cartId
+          in: path
+          required: true
+          description: ID do carrinho
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Carrinho obtido com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetCartResponse"
+              example:
+                success: true
+                message: "Carrinho obtido com sucesso!"
+                cart:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  userId: "123e4567-e89b-12d3-a456-426614174001"
+                  totalAmount: 59.8
+                  status: pending
+                  cartItems:
+                    - id: "123e4567-e89b-12d3-a456-426614174002"
+                      cartId: "123e4567-e89b-12d3-a456-426614174000"
+                      bookId: "123e4567-e89b-12d3-a456-426614174003"
+                      quantity: 2
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Carrinho nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "Carrinho nao encontrado"
+        "500":
+          description: Erro interno ao buscar carrinho
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -130,6 +190,22 @@ components:
         user:
           $ref: "#/components/schemas/CartResponse"
 
+    GetCartResponse:
+      type: object
+      required:
+        - success
+        - message
+        - cart
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Carrinho obtido com sucesso!"
+        cart:
+          $ref: "#/components/schemas/CartResponse"
+
     CartResponse:
       type: object
       properties:
@@ -146,6 +222,7 @@ components:
           example: 59.8
         status:
           type: string
+          enum: [pending, processing, paid, cancelled]
           example: pending
         cartItems:
           type: array

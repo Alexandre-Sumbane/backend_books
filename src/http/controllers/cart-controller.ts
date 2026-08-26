@@ -6,7 +6,7 @@ import { Request, Response } from "express";
 const cartUsecase = MakeCartUsecase();
 
 export class CartController {
- static async addToCart(req: Request, res: Response): Promise<Response> {
+  static async addToCart(req: Request, res: Response): Promise<Response> {
     const { items } = req.body;
 
     try {
@@ -25,7 +25,7 @@ export class CartController {
         user,
       });
     } catch (error: any) {
-        console.log("Erro ao Adicionar itens ao carrinho:", error);
+      console.log("Erro ao Adicionar itens ao carrinho:", error);
       if (error instanceof BusinessException) {
         return res.status(error.statusCode).json({
           success: false,
@@ -36,7 +36,42 @@ export class CartController {
       return res.status(500).json({
         success: false,
         message: "Ocorreu erro ao adicionar itens ao carrinho, tente novamente",
-      })
+      });
+    }
+  }
+
+  static async getCart(req: Request, res: Response): Promise<Response> {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const cartId = req.params.cartId as string;
+
+      const cart = await cartUsecase.getCart(cartId, req.user.userId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Carrinho obtido com sucesso!",
+        cart,
+      });
+    } catch (error: any) {
+      console.log("Erro ao buscar carrinho:", error);
+
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao buscar carrinho, tente novamente",
+      });
     }
   }
 }

@@ -2,6 +2,7 @@ export interface LocationDto {
   name: string;
   description?: string;
   price: number;
+  estimatedTime?: number;
 }
 
 export interface LocationResponse {
@@ -9,6 +10,7 @@ export interface LocationResponse {
   name: string;
   description?: string;
   price: number;
+  estimatedTime?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
