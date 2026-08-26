@@ -1,11 +1,13 @@
-import { AdminRepository } from "./admin-repository";
+
+import { OrderStatus } from "@/domain/model/order";
+import { ClientRepository } from "./client-repository";
 
 import sequelizeConnection from "@/infra/database/config/database";
-import { Order, OrderStatus } from "@/domain/model/order";
+import { Order } from "@/domain/model/order";
 import { OrderResponse } from "@/domain/Dto/order";
 
-export class SequelizeAdminRepository implements AdminRepository {
-  async changeOrderStatus(orderId: string, status: OrderStatus, userId?: string) {
+export class SequelizeClientRepository implements ClientRepository {
+     async changeOrderStatus(orderId: string, status: OrderStatus, userId: string) {
     const transaction = await sequelizeConnection.transaction();
 
     try {
@@ -18,7 +20,7 @@ export class SequelizeAdminRepository implements AdminRepository {
         {
           where: {
             id: orderId,
-            ...(userId && { userId }),
+            userId,
           },
           transaction,
         },
@@ -35,4 +37,6 @@ export class SequelizeAdminRepository implements AdminRepository {
       throw error;
     }
   }
+
+
 }

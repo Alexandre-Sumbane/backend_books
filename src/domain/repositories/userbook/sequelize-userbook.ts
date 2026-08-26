@@ -1,19 +1,25 @@
 import {
   UserEbook,
-  UserEbookInput,
   UserEbookOutput,
+  UserEbookStatus,
 } from "@/domain/model/userBook";
 import { UserBookRepository } from "./userRepository";
+import { OrderItemDto } from "@/domain/model/orderitem";
 
 export class SequelizeUserBookRepository implements UserBookRepository {
-  async addUserBook(input: UserEbookInput) {
-    const { userId, ebookId } = input;
+  async addUserBook(orderItems: OrderItemDto[], userId: string) {
 
-    const userBook = await UserEbook.create({
-      userId,
-      ebookId,
-      purchasedAt: new Date(),
-    });
+    let userBook;
+
+    for(const orderItem of orderItems){
+      const {bookId} = orderItem;
+      userBook = await UserEbook.create({
+        userId,
+        ebookId: bookId,
+        status: UserEbookStatus.active,
+        purchasedAt: new Date(),
+      });
+    }
 
     return userBook as UserEbookOutput;
   }

@@ -1,6 +1,4 @@
-import {
-  CreateDigitalWalletDto,
-} from "@/domain/Dto/digitalWallet";
+import { CreateDigitalWalletDto } from "@/domain/Dto/digitalWallet";
 import { PaymentMethod } from "@/domain/model/payment";
 
 import {
@@ -18,12 +16,20 @@ import { env } from "@/env";
 
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 import { OrderStatus } from "@/domain/model/order";
+import { UserBookRepository } from "@/domain/repositories/userbook/userRepository";
+import { OrderItemDto } from "@/domain/model/orderitem";
+
+interface UserBookAssociationDto {
+  orderItems?: OrderItemDto[];
+  userId: string;
+}
 
 export class PaymentUsecases {
   constructor(
     private paymentRepository: PaymentRepository,
     private orderRepository: OrderRepository,
     private digitalWalletRepository: DigitalWalletRepository,
+    private userbookRepository: UserBookRepository,
   ) {}
 
   async createPayment(data: PaymentDto, token: string): Promise<any> {
@@ -39,14 +45,17 @@ export class PaymentUsecases {
       throw HttpExceptionFactory.conflict("Pagamento nao criado!");
     }
 
-    const digitalWallet = await this.digitalWallet({
-      amount: order.totalAmount || 0,
-      userId: data.userId,
-      phoneNumber: data.phoneNumber || "",
-      paymentId: payment.id,
-      type: data.paymentMethod,
-      orderId: data.orderId,
-    }, token);
+    const digitalWallet = await this.digitalWallet(
+      {
+        amount: order.totalAmount || 0,
+        userId: data.userId,
+        phoneNumber: data.phoneNumber || "",
+        paymentId: payment.id,
+        type: data.paymentMethod,
+        orderId: data.orderId,
+      },
+      token,
+    );
 
     if (!digitalWallet) {
       throw HttpExceptionFactory.conflict("Pagamento nao criado!");
@@ -58,7 +67,6 @@ export class PaymentUsecases {
   }
 
   private async digitalWallet(data: CreateDigitalWalletDto, token: string) {
-  
     switch (data.type) {
       case PaymentMethod.mpesa:
         {
@@ -71,7 +79,10 @@ export class PaymentUsecases {
     }
   }
 
-  async payWithMpesa(data: CreateDigitalWalletDto, token: string): Promise<any> {
+  async payWithMpesa(
+    data: CreateDigitalWalletDto,
+    token: string,
+  ): Promise<any> {
     try {
       const order = await this.orderRepository.getOrderById(data.orderId);
 
@@ -79,7 +90,9 @@ export class PaymentUsecases {
         throw HttpExceptionFactory.notFound("Pedido não encontrado");
       }
 
-      const payment = await this.paymentRepository.getPaymentById(data.paymentId);
+      const payment = await this.paymentRepository.getPaymentById(
+        data.paymentId,
+      );
 
       if (!payment) {
         throw HttpExceptionFactory.conflict("Pagamento nao criado!");
@@ -114,15 +127,52 @@ export class PaymentUsecases {
         reference: gateway.reference,
       });
 
-      await this.digitalWalletRepository.updateOnPayment({
-        transactionReference: gateway.reference,
-        responseDescription: gateway.mensagem,
-        responseCode: gateway.statusCode,
-      }, mpesa.id);
+      await this.digitalWalletRepository.updateOnPayment(
+        {
+          transactionReference: gateway.reference,
+          responseDescription: gateway.mensagem,
+          responseCode: gateway.statusCode,
+        },
+        mpesa.id,
+      );
+
+      // if (paymentStatus === PaymentStatus.completed) {
+      //   if (data.shippingAddress) {
+      //     await this.orderRepository.updateStatus({status: OrderStatus.processing}, order.id);
+
+      //     await this.userbookAssociation(
+      //      {
+      //       orderItems: order.orderItems,
+      //       userId: data.userId
+      //     });
+      //   }
+
+      //   await this.orderRepository.updateStatus({status: OrderStatus.completed}, order.id);
+      // }
 
       if (paymentStatus === PaymentStatus.completed) {
         if (data.shippingAddress) {
-          await this.orderRepository.updateStatus({status: OrderStatus.shipped}, order.id);
+          // Produto físico: precisa de entrega
+          await this.orderRepository.updateStatus(
+            { status: OrderStatus.processing },
+            order.id,
+          );
+
+          await this.userbookAssociation({
+            orderItems: order.orderItems,
+            userId: data.userId,
+          });
+        } else {
+          // Produto digital: confirmação automática
+          await this.userbookAssociation({
+            orderItems: order.orderItems,
+            userId: data.userId,
+          });
+
+          await this.orderRepository.updateStatus(
+            { status: OrderStatus.completed },
+            order.id,
+          );
         }
       }
 
@@ -208,5 +258,20 @@ export class PaymentUsecases {
       console.error("Erro Mpesa:", error.message);
       throw new Error(`Falha ao processar pagamento Mpesa: ${error.message}`);
     }
+  }
+  private async userbookAssociation({
+    orderItems,
+    userId,
+  }: UserBookAssociationDto) {
+    if (!orderItems || orderItems.length === 0) {
+      throw HttpExceptionFactory.notFound("Itens nao encontrados");
+    }
+
+    const userBook = await this.userbookRepository.addUserBook(
+      orderItems,
+      userId,
+    );
+
+    return userBook;
   }
 }

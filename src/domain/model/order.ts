@@ -4,6 +4,7 @@ import { OrderItem } from "./orderitem";
 
 export enum OrderStatus {
   pending = "pending",
+  processing = "processing",
   shipped = "shipped",
   delivered = "delivered",
   completed = "completed",

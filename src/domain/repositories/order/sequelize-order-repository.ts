@@ -1,4 +1,8 @@
-import { CreateOrder, OrderResponse, UpdateStatusDto } from "@/domain/Dto/order";
+import {
+  CreateOrder,
+  OrderResponse,
+  UpdateStatusDto,
+} from "@/domain/Dto/order";
 import { OrderRepository } from "./order-repository";
 
 import sequelizeConnection from "@/infra/database/config/database";
@@ -49,10 +53,10 @@ export class SequelizeOrderRepository implements OrderRepository {
     }
   }
 
-    async getOrderById(orderId: string) {
+  async getOrderById(orderId: string) {
     const order = await Order.findOne({
       where: {
-        id: orderId
+        id: orderId,
       },
       include: [
         {
@@ -86,51 +90,48 @@ export class SequelizeOrderRepository implements OrderRepository {
     return orders;
   }
 
- async updateStatus(
-  item: UpdateStatusDto,
-  orderId: string
-): Promise<OrderResponse> {
-  const transaction = await sequelizeConnection.transaction();
+  async updateStatus(
+    item: UpdateStatusDto,
+    orderId: string,
+  ): Promise<OrderResponse> {
+    const transaction = await sequelizeConnection.transaction();
 
-  try {
-
-    const [updated] = await Order.update(
-      {
-        status: item.status,
-      },
-      {
-        where: {
-          id: orderId,
+    try {
+      const [updated] = await Order.update(
+        {
+          status: item.status,
         },
-        transaction,
-      }
-    );
-
-    if (updated === 0) {
-      await transaction.rollback();
-
-      throw HttpExceptionFactory.notFound(
-        "Order not found!"
+        {
+          where: {
+            id: orderId,
+          },
+          transaction,
+        },
       );
+
+      if (updated === 0) {
+        await transaction.rollback();
+
+        throw HttpExceptionFactory.notFound("Order not found!");
+      }
+
+      const order = await Order.findByPk(orderId, {
+        transaction,
+      });
+
+      await transaction.commit();
+
+      return order as OrderResponse;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    const order = await Order.findByPk(orderId, {
-      transaction,
-    });
-
-    await transaction.commit();
-
-    return order as OrderResponse;
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
   }
-}
 
   async getUserOrders(userId: string) {
     const order = await Order.findAll({
       where: {
-        userId
+        userId,
       },
       include: [
         {
@@ -148,7 +149,6 @@ export class SequelizeOrderRepository implements OrderRepository {
   }
 
   async removeOrder(orderId: string, userId: string) {
-    
     const transaction = await sequelizeConnection.transaction();
 
     try {
@@ -168,7 +168,6 @@ export class SequelizeOrderRepository implements OrderRepository {
       });
 
       await transaction.commit();
-
     } catch (error) {
       console.log("Erro ao remover Order:", error);
 

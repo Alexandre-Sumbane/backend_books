@@ -10,14 +10,23 @@ import PaymentRoutes from "@/http/routes/payment.routes";
 import SellerRoutes from "@/http/routes/seller.routes";
 import AdminRoutes from "@/http/routes/admin.routes";   
 
-import { swaggerSpec } from "../../swagger";
-import swaggerUi from "swagger-ui-express";
+import cors from "cors";
 
 import path from "path";
+
+
+
+import { swaggerSpec } from "../../swagger";
+import swaggerUi from "swagger-ui-express";
 
 const app = express();
 const uploadsRoot = path.resolve(process.cwd(), "src", "infra", "infra", "uploads");
 
+
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "DELETE", "PATCH", "PUT"]
+}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

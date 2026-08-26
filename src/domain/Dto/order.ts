@@ -34,4 +34,6 @@ export interface OrderResponse {
     status: string;
     shippingAddress?: string | null;
     userId: string;
+
+    orderItems?: OrderItemDto[]
 }

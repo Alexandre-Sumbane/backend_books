@@ -1,10 +1,18 @@
 import { ChangeWithdrawalRequestDto } from "@/domain/Dto/with-drawal.dto";
+import { OrderStatus } from "@/domain/model/order";
+import { AdminRepository } from "@/domain/repositories/admin/admin-repository";
+import { OrderRepository } from "@/domain/repositories/order/order-repository";
 import { WithdrawalRequestRepository } from "@/domain/repositories/withdrawalrequest/withdrawalrequest-repository";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 
 
 export class AdminUsecase {
-    constructor(private withdrawalRepository: WithdrawalRequestRepository){} 
+
+    constructor(
+      private orderRepository: OrderRepository,
+      private withdrawalRepository: WithdrawalRequestRepository,
+      private adminRepository: AdminRepository
+    ){} 
 
     async changestatusWithdrwalRequest({withdrawalId, status, reason}: ChangeWithdrawalRequestDto){
 
@@ -23,5 +31,24 @@ export class AdminUsecase {
         const result = await this.withdrawalRepository.changeStatusWithdrawalRequest({withdrawalId, status, reason});
 
         return result;
+    }
+
+    async changeOrderStatus(orderId: string, status: OrderStatus){
+
+      const validStatus = ["shipped", "delivered", "completed", "cancelled"];
+
+      if (!validStatus.includes(status)) {
+        throw HttpExceptionFactory.badRequest("Status invalido!");
+      }
+
+      const order = await this.orderRepository.getOrderById(orderId);
+
+      if (!order) {
+        throw HttpExceptionFactory.notFound("Order nao encontrada!");
+      }
+
+      const result = await this.adminRepository.changeOrderStatus(orderId, status);
+
+      return result
     }
 }
