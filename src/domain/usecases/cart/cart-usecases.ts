@@ -33,7 +33,7 @@ export class CartUsecases {
       );
     }
 
-    let cart = await this.cartRepository.getUserCart({userId: userId});
+    let cart = await this.cartRepository.getUserCart({ userId: userId });
 
     if (!cart) {
       cart = await this.cartRepository.create({
@@ -43,8 +43,8 @@ export class CartUsecases {
 
       cart.cartItems = [];
     }
-
-    let totalAmount = cart.totalAmount ?? 0;
+    
+    let totalAmount = Number(cart.totalAmount ?? 0);
 
     for (const item of items) {
       const book = await this.ebookRepository.findById(item.bookId);
@@ -64,7 +64,7 @@ export class CartUsecases {
         throw HttpExceptionFactory.conflict("Quantidade insuficiente!");
       }
 
-      const realPrice = book.price;
+      const realPrice = Number(book.price);
 
       if (existingItem) {
         await this.cartItemsRepository.updateItem({
@@ -90,8 +90,7 @@ export class CartUsecases {
   }
 
   async getCart(userId: string) {
-    
-    const cart = await this.cartRepository.getUserCart({userId: userId});
+    const cart = await this.cartRepository.getUserCart({ userId: userId });
 
     if (!cart) {
       throw HttpExceptionFactory.notFound("Carrinho nao encontrado");
@@ -99,5 +98,4 @@ export class CartUsecases {
 
     return cart;
   }
-
 }

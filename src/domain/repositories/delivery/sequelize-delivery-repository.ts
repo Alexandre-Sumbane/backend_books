@@ -1,4 +1,4 @@
-import { Delivery, DeliveryDto, DeliveryOutput } from "@/domain/model/delivery";
+import { Delivery, DeliveryDto, DeliveryOutput, DeliveryStatus } from "@/domain/model/delivery";
 import { DeliveryRepository } from "./delivery-repository";
 
 
@@ -36,6 +36,14 @@ export class SequelizeDeliveryRepository implements DeliveryRepository{
         const delivery = await Delivery.findOne({where: {id}});
 
         await delivery?.update(data);
+
+        return delivery as DeliveryOutput;
+    }
+
+    async updateDeliveryStatus(id: string, status: DeliveryStatus){
+        const delivery = await Delivery.findOne({where: {id}});
+
+        await delivery?.update({status});
 
         return delivery as DeliveryOutput;
     }

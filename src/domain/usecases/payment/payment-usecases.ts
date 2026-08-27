@@ -18,6 +18,8 @@ import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 import { OrderStatus } from "@/domain/model/order";
 import { UserBookRepository } from "@/domain/repositories/userbook/userRepository";
 import { OrderItemDto } from "@/domain/model/orderitem";
+import { DeliveryRepository } from "@/domain/repositories/delivery/delivery-repository";
+import { DeliveryStatus } from "@/domain/model/delivery";
 
 interface UserBookAssociationDto {
   orderItems?: OrderItemDto[];
@@ -30,6 +32,7 @@ export class PaymentUsecases {
     private orderRepository: OrderRepository,
     private digitalWalletRepository: DigitalWalletRepository,
     private userbookRepository: UserBookRepository,
+    private deliveryRepository: DeliveryRepository
   ) {}
 
   async createPayment(data: PaymentDto, token: string): Promise<any> {
@@ -37,6 +40,10 @@ export class PaymentUsecases {
 
     if (!order) {
       throw HttpExceptionFactory.notFound("Pedido não encontrado");
+    }
+
+    if (order.status !== OrderStatus.pending) {
+      throw HttpExceptionFactory.conflict("Pedido ja foi processado!");
     }
 
     const payment = await this.paymentRepository.createPayment(data);
@@ -53,6 +60,7 @@ export class PaymentUsecases {
         paymentId: payment.id,
         type: data.paymentMethod,
         orderId: data.orderId,
+        shippingAddress: order.shippingAddress || undefined,
       },
       token,
     );
@@ -87,8 +95,9 @@ export class PaymentUsecases {
       const order = await this.orderRepository.getOrderById(data.orderId);
 
       if (!order) {
-        throw HttpExceptionFactory.notFound("Pedido não encontrado");
+        throw HttpExceptionFactory.notFound("Pedido nao encontrado!");
       }
+
 
       const payment = await this.paymentRepository.getPaymentById(
         data.paymentId,
@@ -152,16 +161,22 @@ export class PaymentUsecases {
 
       if (paymentStatus === PaymentStatus.completed) {
         if (data.shippingAddress) {
-          // Produto físico: precisa de entrega
+        
           await this.orderRepository.updateStatus(
             { status: OrderStatus.processing },
             order.id,
           );
 
+          await this.deliveryRepository.updateDeliveryStatus(
+            order.id, 
+            DeliveryStatus.processing
+          )
+
           await this.userbookAssociation({
             orderItems: order.orderItems,
             userId: data.userId,
           });
+
         } else {
           // Produto digital: confirmação automática
           await this.userbookAssociation({
