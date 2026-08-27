@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
 import { OrderItem } from "./orderitem";
+import { Delivery } from "./delivery";
 
 export enum OrderStatus {
   pending = "pending",
@@ -92,6 +93,11 @@ Order.init(
 );
 
 Order.hasMany(OrderItem, {
-  as: "orderItems",
   foreignKey: "orderId",
+  as: "orderItems",
+});
+
+Order.hasOne(Delivery, {
+  foreignKey: "orderId",
+  as: "delivery",
 })

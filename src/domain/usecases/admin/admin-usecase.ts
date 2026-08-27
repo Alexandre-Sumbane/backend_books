@@ -9,10 +9,20 @@ import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 export class AdminUsecase {
 
     constructor(
-      private orderRepository: OrderRepository,
       private withdrawalRepository: WithdrawalRequestRepository,
-      private adminRepository: AdminRepository
+      private adminRepository: AdminRepository,
+      private ordersRepository: OrderRepository
     ){} 
+
+    async getAllOrders(){
+        const orders = await this.ordersRepository.getAllOrders();
+
+        if (!orders || orders.length === 0) {
+          throw HttpExceptionFactory.notFound("Nenhuma pedido foi encontrado!");
+        }
+
+        return orders;
+    }
 
     async changestatusWithdrwalRequest({withdrawalId, status, reason}: ChangeWithdrawalRequestDto){
 
@@ -41,7 +51,7 @@ export class AdminUsecase {
         throw HttpExceptionFactory.badRequest("Status invalido!");
       }
 
-      const order = await this.orderRepository.getOrderById(orderId);
+      const order = await this.ordersRepository.getOrderById(orderId);
 
       if (!order) {
         throw HttpExceptionFactory.notFound("Order nao encontrada!");

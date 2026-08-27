@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
+import { Order } from "./order";
 
 export interface OrderItemModel {
   id: string;

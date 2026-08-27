@@ -113,7 +113,3 @@ Delivery.init(
   },
 );
 
-Delivery.hasOne(Order, {
-  as: "order",
-  foreignKey: "orderId",
-});

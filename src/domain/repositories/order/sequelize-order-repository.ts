@@ -11,6 +11,7 @@ import { Order } from "@/domain/model/order";
 import { OrderItem } from "@/domain/model/orderitem";
 import { CartItem } from "@/domain/model/cartitem";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
+import { Delivery } from "@/domain/model/delivery";
 
 export class SequelizeOrderRepository implements OrderRepository {
   async create(orderDto: CreateOrder) {
@@ -53,15 +54,20 @@ export class SequelizeOrderRepository implements OrderRepository {
     }
   }
 
-  async getOrderById(orderId: string) {
+  async getOrderById(orderId: string, userId?: string) {
     const order = await Order.findOne({
       where: {
         id: orderId,
+        ...(userId && { userId }),
       },
       include: [
         {
           model: OrderItem,
           as: "orderItems",
+        },
+        {
+          model: Delivery,
+          as: "delivery",
         },
       ],
     });
@@ -79,6 +85,10 @@ export class SequelizeOrderRepository implements OrderRepository {
         {
           model: OrderItem,
           as: "orderItems",
+        },
+        {
+          model: Delivery,
+          as: "delivery",
         },
       ],
     });
@@ -137,6 +147,10 @@ export class SequelizeOrderRepository implements OrderRepository {
         {
           model: OrderItem,
           as: "orderItems",
+        },
+        {
+          model: Delivery,
+          as: "delivery",
         },
       ],
     });
