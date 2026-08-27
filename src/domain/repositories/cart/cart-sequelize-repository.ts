@@ -3,7 +3,7 @@ import { CartRepository } from "./cart-repository";
 import sequelizeConnection from "@/infra/database/config/database";
 
 import { Cart } from "@/domain/model/cart";
-import { CartDto, CartResponse } from "@/domain/Dto/Cart";
+import { CartDto, CartResponse, GetCartProps } from "@/domain/Dto/Cart";
 import { CartItem } from "@/domain/model/cartitem";
 
 export class SequelizeCartRepository implements CartRepository {
@@ -77,11 +77,11 @@ export class SequelizeCartRepository implements CartRepository {
     }
   }
 
-  async getUserCart(cartId: string, userId: string) {
+  async getUserCart({cartId, userId}: GetCartProps) {
     const cart = await Cart.findOne({
       where: {
         userId,
-        id: cartId,
+        ...(cartId && { id: cartId }),
       },
       include: [
         {

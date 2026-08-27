@@ -9,6 +9,7 @@ const router = Router();
 
 
 router.post("/add",  AuthMiddleware.authenticate, CartController.addToCart);
+router.get("/user", AuthMiddleware.authenticate, CartController.getCart);
 router.get("/:cartId", AuthMiddleware.authenticate, CartController.getCart);
 
 

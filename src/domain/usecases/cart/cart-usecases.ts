@@ -33,7 +33,7 @@ export class CartUsecases {
       );
     }
 
-    let cart = await this.cartRepository.getUserCart(userId, "pending");
+    let cart = await this.cartRepository.getUserCart({userId: userId});
 
     if (!cart) {
       cart = await this.cartRepository.create({
@@ -89,8 +89,8 @@ export class CartUsecases {
     return cart;
   }
 
-  async getCart(cartId: string, userId: string) {
-    const cart = await this.cartRepository.getUserCart( cartId, userId);
+  async getCart(userId: string, cartId?: string) {
+    const cart = await this.cartRepository.getUserCart({ userId, cartId });
 
     if (!cart) {
       throw HttpExceptionFactory.notFound("Carrinho nao encontrado");
@@ -98,4 +98,5 @@ export class CartUsecases {
 
     return cart;
   }
+
 }

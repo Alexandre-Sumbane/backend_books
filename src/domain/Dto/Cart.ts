@@ -13,3 +13,8 @@ export interface CartResponse {
     status: string;
     cartItems?: CartItemDto[];
 }
+
+export interface GetCartProps {
+    cartId?: string;
+    userId: string;
+}

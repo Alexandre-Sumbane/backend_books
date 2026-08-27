@@ -49,9 +49,10 @@ export class CartController {
         });
       }
 
-      const cartId = req.params.cartId as string;
+      const userId = req.user.userId as string;
+      const cartId = req.params.cartId as string | undefined;
 
-      const cart = await cartUsecase.getCart(cartId, req.user.userId);
+      const cart = await cartUsecase.getCart(userId, cartId);
 
       return res.status(200).json({
         success: true,
