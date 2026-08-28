@@ -3,6 +3,90 @@ tags:
     description: Operacoes administrativas
 
 paths:
+  /admin/orders:
+    get:
+      summary: Listar todos os pedidos para administracao
+      description: Retorna todos os pedidos com seus itens. Disponivel apenas para usuarios administradores.
+      operationId: getAdminOrders
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Pedidos encontrados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderListResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "403":
+          description: Usuario nao autorizado como administrador
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "500":
+          description: Erro interno ao listar os pedidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+
+  /admin/order/{orderId}:
+    get:
+      summary: Buscar pedido por ID para administracao
+      description: Retorna um pedido com seus itens. Disponivel apenas para usuarios administradores.
+      operationId: getAdminOrderById
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: ID do pedido
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Pedido encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOrderResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "403":
+          description: Usuario nao autorizado como administrador
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "404":
+          description: Pedido nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "500":
+          description: Erro interno ao buscar o pedido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+
   /admin/withdrawal/{withdrawalId}:
     put:
       summary: Atualizar status de um pedido de saque
@@ -57,6 +141,32 @@ paths:
 
 components:
   schemas:
+    AdminOrderListResponse:
+      type: object
+      required:
+        - success
+        - orders
+      properties:
+        success:
+          type: boolean
+          example: true
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderWithItems"
+
+    AdminOrderResponse:
+      type: object
+      required:
+        - success
+        - orders
+      properties:
+        success:
+          type: boolean
+          example: true
+        orders:
+          $ref: "#/components/schemas/OrderWithItems"
+
     AdminWithdrawalStatusRequest:
       type: object
       required:

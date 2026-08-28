@@ -185,6 +185,55 @@ paths:
                 success: false
                 message: "Ocorreu erro ao buscar pedidos do usuario, tente novamente"
 
+  /orders/{orderId}:
+    get:
+      summary: Buscar pedido por ID
+      description: Retorna um pedido do usuario autenticado, incluindo seus itens e os dados basicos de cada ebook.
+      operationId: getOrderById
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: ID do pedido
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Pedido encontrado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+        "401":
+          description: Usuario nao autenticado ou token ausente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+        "403":
+          description: Token de autenticacao invalido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+        "404":
+          description: Pedido nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+        "500":
+          description: Erro interno ao buscar o pedido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderErrorResponse"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -261,6 +310,7 @@ components:
               cartId: "123e4567-e89b-12d3-a456-426614174000"
               createdAt: "2026-08-15T12:30:00.000Z"
               updatedAt: "2026-08-15T12:30:00.000Z"
+
               orderItems:
                 - id: "123e4567-e89b-12d3-a456-426614174004"
                   orderId: "123e4567-e89b-12d3-a456-426614174002"
@@ -268,6 +318,18 @@ components:
                   quantity: 2
                   createdAt: "2026-08-15T12:30:00.000Z"
                   updatedAt: "2026-08-15T12:30:00.000Z"
+
+    OrderResponse:
+      type: object
+      required:
+        - success
+        - order
+      properties:
+        success:
+          type: boolean
+          example: true
+        order:
+          $ref: "#/components/schemas/OrderWithItems"
 
     Order:
       type: object
@@ -350,12 +412,39 @@ components:
           type: integer
           minimum: 1
           example: 2
+        book:
+          $ref: "#/components/schemas/OrderBook"
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+
+    OrderBook:
+      type: object
+      required:
+        - id
+        - title
+        - code
+        - price
+        - language
+        - author
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        code:
+          type: string
+        price:
+          type: number
+          format: double
+        language:
+          type: string
+        author:
+          type: string
 
     OrderErrorResponse:
       type: object
