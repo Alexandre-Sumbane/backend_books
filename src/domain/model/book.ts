@@ -4,6 +4,7 @@ import { Category } from "./category";
 import { CoverImage } from "./coverImage";
 import { EbookFile } from "./bookFile";
 import { CartItem } from "./cartitem";
+import { OrderItem } from "./orderitem";
 
 export enum EbookStatus {
   pendent,

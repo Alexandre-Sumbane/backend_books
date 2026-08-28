@@ -12,6 +12,7 @@ import { OrderItem } from "@/domain/model/orderitem";
 import { CartItem } from "@/domain/model/cartitem";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 import { Delivery } from "@/domain/model/delivery";
+import { Ebook } from "@/domain/model/book";
 
 export class SequelizeOrderRepository implements OrderRepository {
   async create(orderDto: CreateOrder) {
@@ -85,6 +86,13 @@ export class SequelizeOrderRepository implements OrderRepository {
         {
           model: OrderItem,
           as: "orderItems",
+          include: [
+            {
+              model: Ebook,
+              as: "book",
+              attributes: ["id", "title", "code", "price", "language", "author"],
+            },
+          ]
         },
         {
           model: Delivery,
@@ -147,6 +155,13 @@ export class SequelizeOrderRepository implements OrderRepository {
         {
           model: OrderItem,
           as: "orderItems",
+          include: [
+            {
+              model: Ebook,
+              as: "book",
+              attributes: ["id", "title", "code", "price", "language", "author"],
+            },
+          ]
         },
         {
           model: Delivery,

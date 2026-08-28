@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelizeConnection from "@/infra/database/config/database";
 import { Order } from "./order";
+import { Ebook } from "./book";
 
 export interface OrderItemModel {
   id: string;
@@ -61,3 +62,9 @@ OrderItem.init(
     timestamps: true,
   },
 );
+
+OrderItem.belongsTo(Ebook, {
+  foreignKey: "bookId",
+  targetKey: "id",
+  as: "book",
+});
