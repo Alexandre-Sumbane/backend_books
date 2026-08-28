@@ -1,13 +1,50 @@
-
 import { OrderStatus } from "@/domain/model/order";
 import { ClientRepository } from "./client-repository";
 
 import sequelizeConnection from "@/infra/database/config/database";
 import { Order } from "@/domain/model/order";
 import { OrderResponse } from "@/domain/Dto/order";
+import { Ebook } from "@/domain/model/book";
 
 export class SequelizeClientRepository implements ClientRepository {
-     async changeOrderStatus(orderId: string, status: OrderStatus, userId: string) {
+  async getClientOrders(userId: string) {
+    const order = await Order.findAll({
+      where: {
+        userId,
+      },
+      include: [
+        {
+          model: Order,
+          as: "orderItems",
+          include: [
+            {
+              model: Ebook,
+              as: "book",
+              attributes: [
+                "id",
+                "title",
+                "code",
+                "price",
+                "language",
+                "author",
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!order || order.length === 0) {
+      return null;
+    }
+
+    return order as OrderResponse[];
+  }
+  async changeOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    userId: string,
+  ) {
     const transaction = await sequelizeConnection.transaction();
 
     try {
@@ -37,6 +74,4 @@ export class SequelizeClientRepository implements ClientRepository {
       throw error;
     }
   }
-
-
 }

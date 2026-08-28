@@ -12,6 +12,7 @@ import OrderRoutes from "@/http/routes/order.routes";
 import PaymentRoutes from "@/http/routes/payment.routes";
 import SellerRoutes from "@/http/routes/seller.routes";
 import AdminRoutes from "@/http/routes/admin.routes";
+import ClientRoutes from "@/http/routes/client.routes";
 
 import { swaggerSpec } from "../../swagger";
 
@@ -53,6 +54,7 @@ app.use("/orders", OrderRoutes);
 app.use("/payments", PaymentRoutes);
 app.use("/seller", SellerRoutes);
 app.use("/admin", AdminRoutes);
+app.use("/client", ClientRoutes);
 
 app.use("/uploads", express.static(uploadsRoot));
 
