@@ -45,7 +45,7 @@ export class SequelizeOrderRepository implements OrderRepository {
 
       await transaction.commit();
 
-      return order;
+      return order as OrderResponse;
     } catch (error) {
       console.log("Erro ao criar Order:", error);
 
@@ -77,7 +77,7 @@ export class SequelizeOrderRepository implements OrderRepository {
       return null;
     }
 
-    return order;
+    return order as OrderResponse;
   }
 
   async getAllOrders() {
@@ -105,7 +105,7 @@ export class SequelizeOrderRepository implements OrderRepository {
       return null;
     }
 
-    return orders;
+    return orders as OrderResponse[];
   }
 
   async updateStatus(
@@ -174,7 +174,7 @@ export class SequelizeOrderRepository implements OrderRepository {
       return null;
     }
 
-    return order;
+    return order as OrderResponse[];
   }
 
   async removeOrder(orderId: string, userId: string) {

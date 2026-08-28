@@ -1,8 +1,14 @@
+import { CartStatus } from "../model/cart";
 import { CartItemDto } from "./CartItem";
 
 export interface CartDto {
     userId: string;
     totalAmount: number;
+}
+
+export interface UpdateCartDto {
+    totalAmount?: number
+    status?: CartStatus
 }
 
 
@@ -16,5 +22,6 @@ export interface CartResponse {
 
 export interface GetCartProps {
     cartId?: string;
+    status?: CartStatus;
     userId: string;
 }

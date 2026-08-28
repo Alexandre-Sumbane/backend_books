@@ -3,7 +3,7 @@ import { CartRepository } from "./cart-repository";
 import sequelizeConnection from "@/infra/database/config/database";
 
 import { Cart } from "@/domain/model/cart";
-import { CartDto, CartResponse, GetCartProps } from "@/domain/Dto/Cart";
+import { CartDto, CartResponse, GetCartProps, UpdateCartDto } from "@/domain/Dto/Cart";
 import { CartItem } from "@/domain/model/cartitem";
 
 export class SequelizeCartRepository implements CartRepository {
@@ -39,17 +39,18 @@ export class SequelizeCartRepository implements CartRepository {
     }
   }
 
-  async updateCart(totalAmount: number, cartId: string): Promise<CartResponse> {
+  async updateCart(data: UpdateCartDto, cartId: string, userId: string): Promise<CartResponse> {
     const transaction = await sequelizeConnection.transaction();
 
     try {
       await Cart.update(
         {
-          totalAmount,
+          ...data,
         },
         {
           where: {
             id: cartId,
+            userId,
           },
           transaction,
         },
@@ -77,11 +78,12 @@ export class SequelizeCartRepository implements CartRepository {
     }
   }
 
-  async getUserCart({cartId, userId}: GetCartProps) {
+  async getUserCart({cartId, userId, status}: GetCartProps) {
     const cart = await Cart.findOne({
       where: {
         userId,
         ...(cartId && { id: cartId }),
+        ...(status && { status: status }),
       },
       include: [
         {
@@ -98,6 +100,21 @@ export class SequelizeCartRepository implements CartRepository {
     return cart;
   }
   async removeCart(cartId: string, userId: string) {
+    const cart = await Cart.findOne({
+      where: {
+        id: cartId,
+        userId,
+      },
+    });
+
+    if (!cart) {
+      return null;
+    }
+
+    await cart.destroy();
+  }
+
+  async cleanCart(cartId: string, userId: string) {
     const cart = await Cart.findOne({
       where: {
         id: cartId,

@@ -7,6 +7,8 @@ export enum CartStatus {
   processing = "processing",
   paid = "paid",
   cancelled = "cancelled",
+  failed = "failed",
+  blocked = "blocked",
 }
 
 export interface CartAttributes {
@@ -47,7 +49,7 @@ Cart.init(
       defaultValue: 0,
     },
     status: {
-      type: DataTypes.ENUM("pending", "processing", "paid", "cancelled"),
+      type: DataTypes.ENUM("pending", "processing", "paid", "cancelled", "failed", "blocked"),
       allowNull: false,
       defaultValue: CartStatus.pending,
     },

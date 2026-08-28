@@ -4,6 +4,7 @@ import { SequelizeOrderRepository } from "@/domain/repositories/order/sequelize-
 import { SequelizeDigitalWalletRepository } from "@/domain/repositories/digitalWallet/Sequelize-digitalWallet-repository";
 import { SequelizeUserBookRepository } from "@/domain/repositories/userbook/sequelize-userbook";
 import { SequelizeDeliveryRepository } from "@/domain/repositories/delivery/sequelize-delivery-repository";
+import { SequelizeCartRepository } from "@/domain/repositories/cart/cart-sequelize-repository";
 
 export function makePaymentUsecase() {
     const paymentRepository = new SequelizePaymentRepository();
@@ -11,13 +12,15 @@ export function makePaymentUsecase() {
     const digitalWalletRepository = new SequelizeDigitalWalletRepository();
     const userbookRepository = new SequelizeUserBookRepository();
     const deliveryRepository = new SequelizeDeliveryRepository();
+    const cartRepository = new SequelizeCartRepository();
     
     const paymentUsecase = new PaymentUsecases(
         paymentRepository,
         orderRepository,
         digitalWalletRepository,
         userbookRepository,
-        deliveryRepository
+        deliveryRepository,
+        cartRepository
     );
 
     return paymentUsecase;

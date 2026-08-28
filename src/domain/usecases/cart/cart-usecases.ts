@@ -1,4 +1,5 @@
 import { CartItemDto } from "@/domain/Dto/CartItem";
+import { CartStatus } from "@/domain/model/cart";
 import { CartRepository } from "@/domain/repositories/cart/cart-repository";
 import { CartItemRepository } from "@/domain/repositories/cartItem/cartItem-repository";
 import { EbookRepository } from "@/domain/repositories/ebook/ebook-repository";
@@ -32,7 +33,10 @@ export class CartUsecases {
       );
     }
 
-    let cart = await this.cartRepository.getUserCart({ userId: userId });
+    let cart = await this.cartRepository.getUserCart({ 
+      userId: userId,
+      status: CartStatus.pending 
+    });
 
     if (!cart) {
       cart = await this.cartRepository.create({
@@ -83,7 +87,10 @@ export class CartUsecases {
       totalAmount += realPrice * item.quantity;
     }
 
-    cart = await this.cartRepository.updateCart(totalAmount, cart.id);
+    cart = await this.cartRepository.updateCart(
+      {totalAmount: totalAmount},
+      cart.id, userId
+    );
 
     return cart;
   }

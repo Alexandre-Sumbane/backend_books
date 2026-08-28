@@ -37,6 +37,7 @@ export interface OrderResponse {
     totalAmount?: number | null;
     status: string;
     shippingAddress?: string | null;
+    cartId: string;
     userId: string;
 
     orderItems?: OrderItemDto[]

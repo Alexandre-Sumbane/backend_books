@@ -1,12 +1,7 @@
 import { CreateDigitalWalletDto } from "@/domain/Dto/digitalWallet";
 import { PaymentMethod } from "@/domain/model/payment";
 
-import {
-  CreatePaymentDto,
-  PaymentDto,
-  PaymentResponse,
-  PaymentStatus,
-} from "@/domain/Dto/payment";
+import { PaymentDto, PaymentStatus } from "@/domain/Dto/payment";
 import { DigitalWalletRepository } from "@/domain/repositories/digitalWallet/digitalWallet-repository";
 import { OrderRepository } from "@/domain/repositories/order/order-repository";
 import { PaymentRepository } from "@/domain/repositories/payment/payment-repository";
@@ -20,6 +15,9 @@ import { UserBookRepository } from "@/domain/repositories/userbook/userRepositor
 import { OrderItemDto } from "@/domain/model/orderitem";
 import { DeliveryRepository } from "@/domain/repositories/delivery/delivery-repository";
 import { DeliveryStatus } from "@/domain/model/delivery";
+import { CartRepository } from "@/domain/repositories/cart/cart-repository";
+import { CartStatus } from "@/domain/model/cart";
+import { BusinessException } from "@/Exceptions/BusinessExceptions";
 
 interface UserBookAssociationDto {
   orderItems?: OrderItemDto[];
@@ -32,7 +30,8 @@ export class PaymentUsecases {
     private orderRepository: OrderRepository,
     private digitalWalletRepository: DigitalWalletRepository,
     private userbookRepository: UserBookRepository,
-    private deliveryRepository: DeliveryRepository
+    private deliveryRepository: DeliveryRepository,
+    private cartRepository: CartRepository,
   ) {}
 
   async createPayment(data: PaymentDto, token: string): Promise<any> {
@@ -98,7 +97,6 @@ export class PaymentUsecases {
         throw HttpExceptionFactory.notFound("Pedido nao encontrado!");
       }
 
-
       const payment = await this.paymentRepository.getPaymentById(
         data.paymentId,
       );
@@ -127,6 +125,8 @@ export class PaymentUsecases {
         token,
       );
 
+      console.log("gateway - mpesa:", gateway.statusCode);
+
       const paymentStatus = gateway.success
         ? PaymentStatus.completed
         : PaymentStatus.failed;
@@ -145,40 +145,33 @@ export class PaymentUsecases {
         mpesa.id,
       );
 
-      // if (paymentStatus === PaymentStatus.completed) {
-      //   if (data.shippingAddress) {
-      //     await this.orderRepository.updateStatus({status: OrderStatus.processing}, order.id);
-
-      //     await this.userbookAssociation(
-      //      {
-      //       orderItems: order.orderItems,
-      //       userId: data.userId
-      //     });
-      //   }
-
-      //   await this.orderRepository.updateStatus({status: OrderStatus.completed}, order.id);
-      // }
+      await this.errorHadle(gateway.statusCode, gateway.mensagem);
 
       if (paymentStatus === PaymentStatus.completed) {
         if (data.shippingAddress) {
-        
           await this.orderRepository.updateStatus(
             { status: OrderStatus.processing },
             order.id,
           );
 
           await this.deliveryRepository.updateDeliveryStatus(
-            order.id, 
-            DeliveryStatus.processing
-          )
+            order.id,
+            DeliveryStatus.processing,
+          );
 
           await this.userbookAssociation({
             orderItems: order.orderItems,
             userId: data.userId,
           });
 
+          await this.cartRepository.updateCart(
+            {
+              status: CartStatus.paid,
+            },
+            order.cartId,
+            data.userId,
+          );
         } else {
-          // Produto digital: confirmação automática
           await this.userbookAssociation({
             orderItems: order.orderItems,
             userId: data.userId,
@@ -189,11 +182,28 @@ export class PaymentUsecases {
             order.id,
           );
         }
+      } else {
+        await this.orderRepository.updateStatus(
+          { status: OrderStatus.pending },
+          order.id,
+        );
+
+        await this.cartRepository.updateCart(
+          {
+            status: CartStatus.pending,
+          },
+          order.cartId,
+          data.userId,
+        );
       }
 
       return { order, payment, mpesa };
     } catch (error: any) {
       console.log(error);
+
+      if (error instanceof BusinessException) {
+        throw error;
+      }
 
       console.error("Erro no processPayment:", error.message);
 
@@ -225,6 +235,7 @@ export class PaymentUsecases {
         },
       );
       const statusCode = response.data.mpesa.responseCode;
+
       let data;
 
       try {
@@ -271,6 +282,21 @@ export class PaymentUsecases {
       }
     } catch (error: any) {
       console.error("Erro Mpesa:", error.message);
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 408) {
+          return {
+            success: false,
+            reference: error.response.data?.mpesa?.reference ?? null,
+            statusCode: 408,
+            mensagem: "Timeout, levou muito tempo",
+          };
+        }
+
+        console.log("Status:", error.response?.status);
+        console.log("Data:", error.response?.data);
+      }
+
       throw new Error(`Falha ao processar pagamento Mpesa: ${error.message}`);
     }
   }
@@ -288,5 +314,11 @@ export class PaymentUsecases {
     );
 
     return userBook;
+  }
+
+  private async errorHadle(status: number, message: string) {
+    if (status >= 300) {
+      throw HttpExceptionFactory.badRequest(message);
+    }
   }
 }
