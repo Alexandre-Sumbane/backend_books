@@ -5,8 +5,40 @@ import sequelizeConnection from "@/infra/database/config/database";
 import { Order } from "@/domain/model/order";
 import { OrderResponse } from "@/domain/Dto/order";
 import { Ebook } from "@/domain/model/book";
+import { UserEbook } from "@/domain/model/userBook";
+import { Delivery } from "@/domain/model/delivery";
 
 export class SequelizeClientRepository implements ClientRepository {
+  async getItemsBuyed(userId: string): Promise<any | null> {
+    const books = await UserEbook.findAll({
+      where: {
+        userId,
+      },
+      attributes: {
+        exclude: ["createdAt", "updatedAt"],
+      },
+      include: [
+        {
+          model: Ebook,
+          as: "book",
+          attributes: ["id", "title", "code", "price", "language", "author"],
+        },
+        {
+          model: Delivery,
+          as: "delivery",
+          attributes: {
+            exclude: ["createdAt", "updatedAt"],
+          },
+        },
+      ],
+    });
+
+    if (!books || books.length === 0) {
+      return null;
+    }
+
+    return books;
+  }
   async getClientOrders(userId: string) {
     const order = await Order.findAll({
       where: {

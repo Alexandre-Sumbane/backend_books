@@ -1,58 +1,411 @@
 tags:
   - name: Client
-    description: Operações relacionadas ao cliente
+    description: Operações do cliente autenticado
 
 paths:
   /client/orders:
     get:
+      summary: Listar pedidos do cliente autenticado
+      description: Retorna todos os pedidos vinculados ao usuário presente no token de autenticação.
+      operationId: getUserOrders
       tags:
         - Client
-      summary: Lista os pedidos do cliente autenticado
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Pedidos listados com sucesso
+          description: Pedidos do cliente retornados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientOrdersResponse"
         "401":
           description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Usuário não autenticado"
+        "404":
+          description: Nenhum pedido foi encontrado para o cliente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Nenhum pedido foi encontrado!"
         "500":
-          description: Erro interno do servidor
+          description: Erro interno ao buscar os pedidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao buscar pedidos do usuário, tente novamente"
+
+  /client/items-buyed:
+    get:
+      summary: Listar itens/ebooks comprados pelo cliente
+      description: Retorna os livros comprados pelo cliente autenticado, incluindo dados do ebook e informações de entrega.
+      operationId: getItemsBuyed
+      tags:
+        - Client
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Itens comprados retornados com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientItemsBuyedResponse"
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Usuário não autenticado"
+        "404":
+          description: Nenhum livro encontrado para o cliente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Nenhum livro foi encontrado!"
+        "500":
+          description: Erro interno ao buscar os itens comprados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao buscar itens comprados, tente novamente"
 
   /client/order/{orderId}:
     patch:
+      summary: Alterar status de um pedido
+      description: Atualiza o status de um pedido pertencente ao cliente autenticado.
+      operationId: changeOrderStatus
       tags:
         - Client
-      summary: Altera o status de um pedido
       security:
         - bearerAuth: []
       parameters:
         - name: orderId
           in: path
           required: true
+          description: Identificador do pedido
           schema:
             type: string
-          description: Identificador do pedido
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - status
-              properties:
-                status:
-                  type: string
-                  description: Novo status do pedido
-                  example: completed
+              $ref: "#/components/schemas/ClientOrderStatusUpdateRequest"
+            example:
+              status: "completed"
       responses:
         "200":
-          description: Status do pedido alterado com sucesso
+          description: Status do pedido atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientOrderStatusUpdateResponse"
         "400":
-          description: Dados inválidos
+          description: Status inválido ou dados incorretos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Status invalido!"
         "401":
           description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Usuário não autenticado"
         "404":
           description: Pedido não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Order nao encontrada!"
         "500":
-          description: Erro interno do servidor
+          description: Erro interno ao alterar o status do pedido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao buscar pedidos do usuário, tente novamente"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ClientErrorResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Usuário não autenticado"
+
+    ClientOrderStatusUpdateRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: Novo status do pedido
+          enum:
+            - shipped
+            - delivered
+            - completed
+            - cancelled
+          example: completed
+
+    ClientOrderStatusUpdateResponse:
+      type: object
+      required:
+        - success
+        - order
+      properties:
+        success:
+          type: boolean
+          example: true
+        order:
+          $ref: "#/components/schemas/ClientOrder"
+
+    ClientOrdersResponse:
+      type: object
+      required:
+        - success
+        - orders
+      properties:
+        success:
+          type: boolean
+          example: true
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientOrder"
+
+    ClientItemsBuyedResponse:
+      type: object
+      required:
+        - success
+        - items
+      properties:
+        success:
+          type: boolean
+          example: true
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientPurchasedItem"
+
+    ClientOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        orderNumber:
+          type: string
+          example: "ORD-2026-0001"
+        totalAmount:
+          type: number
+          format: double
+          example: 89.9
+        status:
+          type: string
+          enum:
+            - pending
+            - processing
+            - shipped
+            - delivered
+            - completed
+            - cancelled
+          example: completed
+        shippingAddress:
+          type: string
+          nullable: true
+          example: "Rua das Flores, 123"
+        cartId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        orderItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientOrderItem"
+
+    ClientOrderItem:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        bookId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        price:
+          type: number
+          format: double
+          example: 49.9
+        quantity:
+          type: integer
+          example: 1
+        book:
+          $ref: "#/components/schemas/ClientBookSummary"
+
+    ClientBookSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        title:
+          type: string
+          example: "Clean Code"
+        code:
+          type: string
+          example: "CC-001"
+        price:
+          type: number
+          format: double
+          example: 49.9
+        language:
+          type: string
+          example: "Português"
+        author:
+          type: string
+          example: "Robert C. Martin"
+
+    ClientPurchasedItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174004"
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        ebookId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        status:
+          type: string
+          enum:
+            - pending
+            - active
+            - blocked
+            - expired
+            - cancelled
+          example: active
+        purchasedAt:
+          type: string
+          format: date-time
+          example: "2026-08-29T10:00:00.000Z"
+        lastReadPage:
+          type: integer
+          nullable: true
+          example: 32
+        deliveryId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "123e4567-e89b-12d3-a456-426614174005"
+        book:
+          $ref: "#/components/schemas/ClientBookSummary"
+        delivery:
+          $ref: "#/components/schemas/ClientDelivery"
+
+    ClientDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174005"
+        clientName:
+          type: string
+          example: "Maria Silva"
+        phoneNumber:
+          type: string
+          example: "84987654321"
+        shippingAddress:
+          type: string
+          nullable: true
+          example: "Avenida Brasil, 200"
+        estimatedDeliveryTime:
+          type: integer
+          nullable: true
+          example: 3
+        shippedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-08-30T08:00:00.000Z"
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-08-31T15:00:00.000Z"
+        status:
+          type: string
+          enum:
+            - pending
+            - processing
+            - shipped
+            - delivered
+            - completed
+            - cancelled
+          example: delivered
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"

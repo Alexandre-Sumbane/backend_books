@@ -5,6 +5,7 @@ import { CoverImage } from "./coverImage";
 import { EbookFile } from "./bookFile";
 import { CartItem } from "./cartitem";
 import { OrderItem } from "./orderitem";
+import { UserEbook } from "./userBook";
 
 export enum EbookStatus {
   pendent,
@@ -182,3 +183,8 @@ Ebook.belongsTo(Category, {
   foreignKey: "categoryId",
   as: "category",
 });
+
+// Ebook.hasMany(UserEbook, {
+//   foreignKey: "ebookId",
+//   as: "userEbooks",
+// });

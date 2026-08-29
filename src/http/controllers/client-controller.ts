@@ -79,4 +79,35 @@ export class ClientController {
       });
     }
   }
+
+  static async getItemsBuyed(req: Request, res: Response): Promise<Response> {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const items = await clientUsecase.getItemsBuyed(req.user.userId);
+
+      return res.status(200).json({
+        success: true,
+        items,
+      });
+    } catch (error: any) {
+      console.log("Erro ao buscar itens comprados:", error);
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao buscar itens comprados, tente novamente",
+      });
+    }
+  }
 }

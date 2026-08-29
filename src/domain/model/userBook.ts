@@ -1,5 +1,7 @@
 import sequelizeConnection from '@/infra/database/config/database'
 import { DataTypes, Model, type Optional } from 'sequelize';
+import { Delivery } from './delivery';
+import { Ebook } from './book';
 
 export enum UserEbookStatus {
   pending = "pending",
@@ -16,6 +18,7 @@ export interface UserEbookAttributes {
   status: UserEbookStatus;
   purchasedAt?: Date;
   lastReadPage?: number;
+  deliveryId?: string
 }
 
 export interface UserEbookInput extends Optional<UserEbookAttributes, 'id' | 'status'> { }
@@ -30,6 +33,7 @@ export class UserEbook extends Model<UserEbookAttributes, UserEbookInput> implem
   public lastReadPage?: number;
   declare readonly createdAt?: Date
   declare readonly updatedAt?: Date
+  declare deliveryId?: string
 }
 
 UserEbook.init(
@@ -67,6 +71,10 @@ UserEbook.init(
       defaultValue: 0,
       allowNull: true
     },
+    deliveryId: {
+      type: DataTypes.UUID,
+      allowNull: true
+    }
   },
   {
     timestamps: true,
@@ -74,4 +82,16 @@ UserEbook.init(
     tableName: 'userEbook',
   },
 )
+
+UserEbook.belongsTo(Delivery, {
+   foreignKey: 'deliveryId',
+   as: 'delivery' 
+  })
+
+
+UserEbook.belongsTo(Ebook, {
+  foreignKey: "ebookId",
+  as: "book",
+});
+
 

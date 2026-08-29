@@ -4,4 +4,5 @@ import { OrderStatus } from "@/domain/model/order";
 export interface ClientRepository {
     changeOrderStatus(orderId: string, status: OrderStatus, userId: string): Promise<OrderResponse>
     getClientOrders(userId: string): Promise<OrderResponse[] | null>
+    getItemsBuyed(userId: string): Promise<any | null>
 }

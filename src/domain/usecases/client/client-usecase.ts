@@ -34,4 +34,14 @@ export class ClientUsecase {
 
     return result;
   }
+
+  async getItemsBuyed(userId: string): Promise<any | null> {
+    const books = await this.clientRepository.getItemsBuyed(userId);
+
+    if (!books || books == null) {
+      throw HttpExceptionFactory.notFound("Nenhum livro foi encontrado!");
+    }
+
+    return books;
+  }
 }
