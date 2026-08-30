@@ -61,4 +61,11 @@ export class AdminUsecase {
 
       return result
     }
+
+    async getClientConfirmations() {
+
+      const confirmations = await this.adminRepository.getClientConfirmations();
+
+      return confirmations
+    }
 }

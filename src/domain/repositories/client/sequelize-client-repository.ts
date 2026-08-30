@@ -7,8 +7,76 @@ import { OrderResponse } from "@/domain/Dto/order";
 import { Ebook } from "@/domain/model/book";
 import { UserEbook } from "@/domain/model/userBook";
 import { Delivery } from "@/domain/model/delivery";
+import {
+  ClientConfirmation,
+  ClientConfirmationStatus,
+} from "@/domain/model/client-confirmation";
+import { Op } from "sequelize";
+
+export interface ConfirmationItemsProps {
+  orderId: string;
+  bookId: string;
+  quantity?: number;
+  status: ClientConfirmationStatus;
+  userId: string;
+  note?: string;
+}
 
 export class SequelizeClientRepository implements ClientRepository {
+  async confirmItems({
+    orderId,
+    bookId,
+    quantity,
+    status,
+    userId,
+    note,
+  }: ConfirmationItemsProps) {
+
+    const order = await Order.findOne({
+      where: {
+        id: orderId,
+        userId,
+        status: {
+          [Op.notIn]: [OrderStatus.pending, OrderStatus.cancelled],
+        },
+      },
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    const item = await UserEbook.findOne({
+      where: {
+        ebookId: bookId,
+        userId,
+
+      },
+    });
+
+    const confirmation = await ClientConfirmation.create({
+      bookId,
+      orderId,
+      quantity,
+      status,
+      note,
+      userId,
+      confirmedAt: new Date(),
+    });
+
+    if(confirmation.status === ClientConfirmationStatus.received) {
+      confirmation.receivedAt = new Date();
+    }
+
+    if(confirmation.status === ClientConfirmationStatus.cancelled) {
+      confirmation.cancelledAt = new Date();
+    }
+
+    await confirmation.save();
+
+    return confirmation;
+  }
+
   async getItemsBuyed(userId: string): Promise<any | null> {
     const books = await UserEbook.findAll({
       where: {

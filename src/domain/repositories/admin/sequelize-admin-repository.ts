@@ -3,9 +3,16 @@ import { AdminRepository } from "./admin-repository";
 import sequelizeConnection from "@/infra/database/config/database";
 import { Order, OrderStatus } from "@/domain/model/order";
 import { OrderResponse } from "@/domain/Dto/order";
+import { ClientConfirmation } from "@/domain/model/client-confirmation";
+import { Ebook } from "@/domain/model/book";
+import { OrderItem } from "@/domain/model/orderitem";
 
 export class SequelizeAdminRepository implements AdminRepository {
-  async changeOrderStatus(orderId: string, status: OrderStatus, userId?: string) {
+  async changeOrderStatus(
+    orderId: string,
+    status: OrderStatus,
+    userId?: string,
+  ) {
     const transaction = await sequelizeConnection.transaction();
 
     try {
@@ -34,5 +41,43 @@ export class SequelizeAdminRepository implements AdminRepository {
 
       throw error;
     }
+  }
+
+  async getClientConfirmations() {
+    const confirmations = await ClientConfirmation.findAll({
+      include: [
+        {
+          model: Order,
+          as: "order",
+          attributes: ["id", "totalAmount"],
+          include: [
+            {
+              model: OrderItem,
+              as: "orderItems",
+              include: [
+                {
+                  model: Ebook,
+                  as: "book",
+                  attributes: [
+                    "id",
+                    "title",
+                    "code",
+                    "price",
+                    "language",
+                    "author",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!confirmations || confirmations.length === 0) {
+      return null;
+    }
+
+    return confirmations;
   }
 }

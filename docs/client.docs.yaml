@@ -160,6 +160,78 @@ paths:
                 success: false
                 message: "Ocorreu erro ao buscar pedidos do usuário, tente novamente"
 
+  /client/confirm-items/{orderId}:
+    post:
+      summary: Confirmar recebimento ou ausência de item comprado
+      description: Registra a confirmação de um item do pedido do cliente autenticado, indicando recebimento, ausência ou cancelamento.
+      operationId: confirmItemsBuyed
+      tags:
+        - Client
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: Identificador do pedido
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientConfirmationRequest"
+            example:
+              bookId: "123e4567-e89b-12d3-a456-426614174003"
+              quantity: 1
+              status: "received"
+              note: "Entrega confirmada"
+      responses:
+        "200":
+          description: Confirmação registrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientConfirmationResponse"
+        "400":
+          description: Status inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Status invalido!"
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Usuário não autenticado"
+        "404":
+          description: Pedido não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Pedido nao encontrado!"
+        "500":
+          description: Erro interno ao confirmar itens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientErrorResponse"
+              example:
+                success: false
+                message: "Ocorreu erro ao confirmar itens comprados, tente novamente"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -195,6 +267,31 @@ components:
             - cancelled
           example: completed
 
+    ClientConfirmationRequest:
+      type: object
+      required:
+        - bookId
+        - status
+      properties:
+        bookId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        quantity:
+          type: integer
+          example: 1
+        status:
+          type: string
+          enum:
+            - received
+            - notReceived
+            - cancelled
+          example: received
+        note:
+          type: string
+          nullable: true
+          example: "Entrega confirmada"
+
     ClientOrderStatusUpdateResponse:
       type: object
       required:
@@ -206,6 +303,18 @@ components:
           example: true
         order:
           $ref: "#/components/schemas/ClientOrder"
+
+    ClientConfirmationResponse:
+      type: object
+      required:
+        - success
+        - items
+      properties:
+        success:
+          type: boolean
+          example: true
+        items:
+          $ref: "#/components/schemas/ClientConfirmation"
 
     ClientOrdersResponse:
       type: object
@@ -234,6 +343,60 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ClientPurchasedItem"
+
+    ClientConfirmation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174004"
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        bookId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        quantity:
+          type: integer
+          example: 1
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        status:
+          type: string
+          enum:
+            - pending
+            - received
+            - notReceived
+            - cancelled
+          example: received
+        receivedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-08-30T10:00:00.000Z"
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-08-30T10:00:00.000Z"
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        note:
+          type: string
+          nullable: true
+          example: "Entrega confirmada"
+        proofUrl:
+          type: string
+          nullable: true
+          example: null
 
     ClientOrder:
       type: object

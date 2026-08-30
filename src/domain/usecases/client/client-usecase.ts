@@ -1,5 +1,6 @@
 import { OrderStatus } from "@/domain/model/order";
 import { ClientRepository } from "@/domain/repositories/client/client-repository";
+import { ConfirmationItemsProps } from "@/domain/repositories/client/sequelize-client-repository";
 import { OrderRepository } from "@/domain/repositories/order/order-repository";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 
@@ -44,4 +45,21 @@ export class ClientUsecase {
 
     return books;
   }
+
+  async confirmationItems(data: ConfirmationItemsProps): Promise<any | null> {
+
+    const availableStatus  = ["received", "notReceived", "cancelled"];
+
+    if(!availableStatus.includes(data.status)) {
+      throw HttpExceptionFactory.badRequest("Status invalido!");
+    }
+    
+    const result = await this.clientRepository.confirmItems(data);
+
+    if(!result) {
+      throw HttpExceptionFactory.notFound("Pedido nao encontrado!");
+    }
+
+    return result;
+  }  
 }

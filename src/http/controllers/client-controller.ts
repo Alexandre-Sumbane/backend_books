@@ -110,4 +110,45 @@ export class ClientController {
       });
     }
   }
+
+  static async confirmItemsBuyed(req: Request, res: Response): Promise<Response> {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const items = await clientUsecase.confirmationItems({
+        orderId: req.params.orderId as string,
+        bookId: req.body.bookId,
+        quantity: req.body.quantity,  
+        status: req.body.status,
+        note: req.body.note,
+        userId: req.user.userId
+      });
+
+      return res.status(200).json({
+        success: true,
+        items,
+      });
+    } catch (error: any) {
+      console.log("Erro ao confirmar itens comprados:", error);
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao confirmar itens comprados, tente novamente",
+      })
+
+    }
+  }
+
+
 }

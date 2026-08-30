@@ -87,6 +87,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/AdminErrorResponse"
 
+  /admin/client-confirmations:
+    get:
+      summary: Listar confirmações de recebimento do cliente
+      description: Retorna todas as confirmações registradas para itens recebidos ou não recebidos pelos clientes.
+      operationId: getAllClientConfirmations
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Confirmações retornadas com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminClientConfirmationsResponse"
+        "401":
+          description: Usuario nao autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "403":
+          description: Usuario nao autorizado como administrador
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+        "500":
+          description: Erro interno ao buscar confirmações
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminErrorResponse"
+
   /admin/withdrawal/{withdrawalId}:
     put:
       summary: Atualizar status de um pedido de saque
@@ -111,7 +146,7 @@ paths:
               $ref: "#/components/schemas/AdminWithdrawalStatusRequest"
             example:
               withdrawalId: "123e4567-e89b-12d3-a456-426614174000"
-              status: completed
+              status: approved
               reason: "Pedido aprovado"
       responses:
         "200":
@@ -140,6 +175,12 @@ paths:
                 $ref: "#/components/schemas/AdminErrorResponse"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     AdminOrderListResponse:
       type: object
@@ -167,6 +208,114 @@ components:
         orders:
           $ref: "#/components/schemas/OrderWithItems"
 
+    AdminClientConfirmationsResponse:
+      type: object
+      required:
+        - success
+        - confirmations
+      properties:
+        success:
+          type: boolean
+          example: true
+        confirmations:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminClientConfirmation"
+
+    AdminClientConfirmation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        bookId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        quantity:
+          type: integer
+          example: 1
+        userId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174003"
+        status:
+          type: string
+          enum:
+            - pending
+            - received
+            - notReceived
+            - cancelled
+          example: received
+        receivedAt:
+          type: string
+          format: date-time
+          nullable: true
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+          example: "Livro chegou em perfeito estado"
+        proofUrl:
+          type: string
+          nullable: true
+          example: "https://storage.example.com/proof/123.jpg"
+        order:
+          $ref: "#/components/schemas/AdminConfirmationOrder"
+
+    AdminConfirmationOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        totalAmount:
+          type: number
+          format: double
+          example: 99.9
+        orderItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminConfirmationOrderItem"
+
+    AdminConfirmationOrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174004"
+        orderId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        bookId:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        quantity:
+          type: integer
+          example: 1
+        price:
+          type: number
+          format: double
+          example: 99.9
+        book:
+          $ref: "#/components/schemas/ClientBookSummary"
+
     AdminWithdrawalStatusRequest:
       type: object
       required:
@@ -178,7 +327,12 @@ components:
           format: uuid
         status:
           type: string
-          example: completed
+          enum:
+            - approved
+            - blocked
+            - cancelled
+            - rejected
+          example: approved
         reason:
           type: string
           example: "Pedido aprovado"
