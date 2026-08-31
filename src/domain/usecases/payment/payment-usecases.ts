@@ -130,8 +130,6 @@ export class PaymentUsecases {
         token,
       );
 
-      console.log("gateway - mpesa:", gateway.statusCode);
-
       const paymentStatus = gateway.success
         ? PaymentStatus.completed
         : PaymentStatus.failed;
@@ -179,7 +177,7 @@ export class PaymentUsecases {
 
           await this.addTransaction(userBook);
         } else {
-          await this.userbookAssociation({
+          const userBook = await this.userbookAssociation({
             orderItems: order.orderItems,
             userId: data.userId,
           });
@@ -188,6 +186,8 @@ export class PaymentUsecases {
             { status: OrderStatus.completed },
             order.id,
           );
+
+          await this.addTransaction(userBook);
         }
       } else {
         await this.orderRepository.updateStatus(
