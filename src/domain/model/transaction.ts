@@ -79,6 +79,10 @@ Transaction.init({
     allowNull: false,
     defaultValue: TransactionStatus.pending,
   },
+  quantity: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
   
 }, {
     timestamps: true,
