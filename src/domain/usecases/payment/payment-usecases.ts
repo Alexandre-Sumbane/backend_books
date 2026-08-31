@@ -187,6 +187,14 @@ export class PaymentUsecases {
             order.id,
           );
 
+           await this.cartRepository.updateCart(
+            {
+              status: CartStatus.paid,
+            },
+            order.cartId,
+            data.userId,
+          );
+
           await this.addTransaction(userBook);
         }
       } else {

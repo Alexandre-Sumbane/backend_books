@@ -9,6 +9,15 @@ import { TransactionRepository } from "./transaction-repository";
 
 export class SequelizeTransactionRepository implements TransactionRepository {
   async create({ amount, bookId, type, userId, sellerId, status, quantity }: TransactionInput) {
+
+    console.log("amount", amount)
+    console.log("bookId", bookId)
+    console.log("type", type)
+    console.log("userId", userId)
+    console.log("sellerId", sellerId)
+    console.log("status", status)
+    console.log("quantity", quantity)
+
     const transaction = await sequelizeConnection.transaction();
 
     try {
