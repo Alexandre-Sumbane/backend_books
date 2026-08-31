@@ -20,7 +20,7 @@ paths:
               $ref: "#/components/schemas/WithdrawalRequest"
             example:
               amount: 250.00
-              reason: "Solicitação de retirada"
+              walletId: "Solicitação de retirada"
       responses:
         "201":
           description: Solicitação de saque criada com sucesso
