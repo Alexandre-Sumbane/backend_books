@@ -156,10 +156,10 @@ export class SequelizeEbooksRepository implements EbookRepository {
     return ebook;
   }
 
-  async findBySeller(userId: string) {
+  async findBySeller(sellerId: string) {
     const books = await Ebook.findAll({
       where: {
-        userId,
+        sellerId,
       },
       include: [
            {

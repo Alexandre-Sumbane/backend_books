@@ -21,7 +21,6 @@ router.post(
 );
 router.get("/", EbookController.findAll);
 router.get("/category/:categoryId", EbookController.findByCategoryId);
-router.get("/seller", AuthMiddleware.authenticate, EbookController.findBySeller);
 router.get("/:ebookId", EbookController.findById);
 router.put("/:ebookId", AuthMiddleware.authenticate, EbookController.update);
 router.delete("/:ebookId", AuthMiddleware.authenticate, EbookController.delete);

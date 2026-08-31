@@ -1,5 +1,6 @@
 import { ChangeWithdrawalRequestDto } from "@/domain/Dto/with-drawal.dto";
 import { EarningRepository } from "@/domain/repositories/earning/earning-repositories";
+import { EbookRepository } from "@/domain/repositories/ebook/ebook-repository";
 import { WithdrawalRequestRepository } from "@/domain/repositories/withdrawalrequest/withdrawalrequest-repository";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 
@@ -7,8 +8,19 @@ export class SellerUsecases {
 
   constructor(
     private earningRepository: EarningRepository,
-    private withdrawalRepository: WithdrawalRequestRepository
+    private withdrawalRepository: WithdrawalRequestRepository,
+    private ebookRepository: EbookRepository
   ) {}
+
+  async getSellerBooks(sellerId: string) {
+    const books = await this.ebookRepository.findBySeller(sellerId);
+
+    if (!books || books.length === 0) {
+      throw HttpExceptionFactory.notFound("Livro nao encontrado!");
+    }
+
+    return books;
+  }
 
   async getTotalEarnings(sellerId: string): Promise<{ totalEarnings: number }> {
     const bookusers = await this.earningRepository.getSellerEarnings(sellerId);

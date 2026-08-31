@@ -47,6 +47,47 @@ export class SellerController {
     }
   }
 
+  static async getSellerBooks(req: Request, res: Response): Promise<Response> {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const user = await userIsAssociado(req.user.userId, req.user.token);
+
+      if (!user) {
+        return res.status(403).json({
+          success: false,
+          message: "Não autorizado a criar Books",
+        });
+      }
+
+      const books = await sellerUsecase.getSellerBooks(req.user.userId);
+
+      return res.status(200).json({
+        success: true,
+        books,
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          sucess: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao pegar livros, tente novamente!",
+      });
+    }
+  }
+
   static async changeStatusWithdrawal(req: Request, res: Response): Promise<Response> {
     try {
       if (!req.user) {
@@ -97,4 +138,5 @@ export class SellerController {
       });
     }
   }
+
 }
