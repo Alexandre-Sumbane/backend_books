@@ -8,7 +8,7 @@ import sequelizeConnection from "@/infra/database/config/database";
 import { TransactionRepository } from "./transaction-repository";
 
 export class SequelizeTransactionRepository implements TransactionRepository {
-  async create({ amount, bookId, type, userId, sellerId }: TransactionInput) {
+  async create({ amount, bookId, type, userId, sellerId, status, quantity }: TransactionInput) {
     const transaction = await sequelizeConnection.transaction();
 
     try {
@@ -19,6 +19,8 @@ export class SequelizeTransactionRepository implements TransactionRepository {
           type,
           userId,
           sellerId,
+          status,
+          quantity
         },
         {
           transaction,
