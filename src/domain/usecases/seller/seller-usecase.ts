@@ -1,4 +1,5 @@
 import { ChangeWithdrawalRequestDto } from "@/domain/Dto/with-drawal.dto";
+import { WithdrawalRequestInput } from "@/domain/model/withdrawalrequest";
 import { EarningRepository } from "@/domain/repositories/earning/earning-repositories";
 import { EbookRepository } from "@/domain/repositories/ebook/ebook-repository";
 import { WithdrawalRequestRepository } from "@/domain/repositories/withdrawalrequest/withdrawalrequest-repository";
@@ -12,6 +13,20 @@ export class SellerUsecases {
     private ebookRepository: EbookRepository
   ) {}
 
+  async createWithdrawalRequest(data: WithdrawalRequestInput) {
+
+    const totalAmout = await this.getSellerSituation(data.sellerId);
+
+    if(totalAmout.balance < data.amount){
+      throw HttpExceptionFactory.conflict("Saldo insuficiente!");
+    }
+
+    data.reference = this.withdrawalRepository.createReference();
+    
+    const withdrawalRequest = await this.withdrawalRepository.create(data);
+
+    return withdrawalRequest;
+  }
   async getSellerBooks(sellerId: string) {
     const books = await this.ebookRepository.findBySeller(sellerId);
 
@@ -41,6 +56,16 @@ export class SellerUsecases {
 
     return earnings
   }
+
+async getSellerSituation(sellerId: string): Promise<any> {
+  const situation = await this.earningRepository.getSellerSituation(sellerId);
+
+  if(!situation){
+    throw HttpExceptionFactory.notFound("Situacao nao encontrada!");
+  }
+
+  return situation;
+}
   
   async changestatusWithdrwalRequest({withdrawalId, userId, status, reason}: ChangeWithdrawalRequestDto) {
 

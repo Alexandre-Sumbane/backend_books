@@ -15,7 +15,7 @@ export enum WithdrawalRequestStatus {
 export interface WithdrawalRequestAtributes {
   id: string
   sellerId: string
-  reference: string
+  reference?: string
   amount: number
   walletId: string
   reason?: string
@@ -26,7 +26,7 @@ export interface WithdrawalRequestAtributes {
   canceledAt?: Date
 }
 export interface WithdrawalRequestInput
-  extends Optional<WithdrawalRequestAtributes, 'id' | 'status'> {}
+  extends Optional<WithdrawalRequestAtributes, 'id' | 'status' | 'approvedAt' | 'rejectedAt' | 'canceledAt'> {}
 export interface WithdrawalRequestOutput
   extends Required<WithdrawalRequestAtributes> {}
 
@@ -36,7 +36,7 @@ export class WithdrawalRequest extends
 {
   declare id: string;
   declare sellerId: string;
-  declare reference: string;
+  declare reference?: string;
   declare amount: number;
   declare walletId: string;
   declare reason?: string;

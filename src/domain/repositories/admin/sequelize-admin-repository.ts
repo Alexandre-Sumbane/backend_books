@@ -1,4 +1,7 @@
-import { AdminRepository } from "./admin-repository";
+import {
+  AdminRepository,
+  ChangeWithdrawalRequestDto,
+} from "./admin-repository";
 
 import sequelizeConnection from "@/infra/database/config/database";
 import { Order, OrderStatus } from "@/domain/model/order";
@@ -6,6 +9,10 @@ import { OrderResponse } from "@/domain/Dto/order";
 import { ClientConfirmation } from "@/domain/model/client-confirmation";
 import { Ebook } from "@/domain/model/book";
 import { OrderItem } from "@/domain/model/orderitem";
+import {
+  WithdrawalRequest,
+  WithdrawalRequestOutput,
+} from "@/domain/model/withdrawalrequest";
 
 export class SequelizeAdminRepository implements AdminRepository {
   async changeOrderStatus(
@@ -34,6 +41,45 @@ export class SequelizeAdminRepository implements AdminRepository {
       await transaction.commit();
 
       return updated as OrderResponse;
+    } catch (error) {
+      console.log("Erro ao atualizar status do pedido:", error);
+
+      await transaction.rollback();
+
+      throw error;
+    }
+  }
+
+  async changestatusWithdrwalRequest({
+    withdrawalId,
+    status,
+    reason,
+  }: ChangeWithdrawalRequestDto) {
+    const transaction = await sequelizeConnection.transaction();
+
+    try {
+      const withdrawalRequest = await WithdrawalRequest.findByPk(withdrawalId);
+
+      if (!withdrawalRequest) {
+        return null;
+      }
+
+      const updated = await withdrawalRequest?.update(
+        {
+          status: status,
+          reason: reason,
+        },
+        {
+          where: {
+            id: withdrawalId,
+          },
+          transaction,
+        },
+      );
+
+      await transaction.commit();
+
+      return updated as WithdrawalRequestOutput;
     } catch (error) {
       console.log("Erro ao atualizar status do pedido:", error);
 

@@ -1,7 +1,9 @@
 import { ChangeWithdrawalRequestDto } from "@/domain/Dto/with-drawal.dto";
 import { OrderStatus } from "@/domain/model/order";
+import { TransactionStatus, TransactionType } from "@/domain/model/transaction";
 import { AdminRepository } from "@/domain/repositories/admin/admin-repository";
 import { OrderRepository } from "@/domain/repositories/order/order-repository";
+import { TransactionRepository } from "@/domain/repositories/transaction/transaction-repository";
 import { WithdrawalRequestRepository } from "@/domain/repositories/withdrawalrequest/withdrawalrequest-repository";
 import { HttpExceptionFactory } from "helpers/HttpExceptionFactory";
 
@@ -11,7 +13,8 @@ export class AdminUsecase {
     constructor(
       private withdrawalRepository: WithdrawalRequestRepository,
       private adminRepository: AdminRepository,
-      private ordersRepository: OrderRepository
+      private ordersRepository: OrderRepository,
+      private transactionRepository: TransactionRepository
     ){} 
 
     async getAllOrders(){
@@ -39,6 +42,15 @@ export class AdminUsecase {
         }
 
         const result = await this.withdrawalRepository.changeStatusWithdrawalRequest({withdrawalId, status, reason});
+
+        if(result.status === "approved"){
+          await this.transactionRepository.create({
+            amount: -Number(withdrawal.amount),
+            sellerId: withdrawal.sellerId,
+            type: TransactionType.withdrawal,
+            status: TransactionStatus.confirmed
+          })
+        }
 
         return result;
     }

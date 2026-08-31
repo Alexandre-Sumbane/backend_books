@@ -15,6 +15,7 @@ export interface UserEbookAttributes {
   id: string;
   userId: string;
   ebookId: string;
+  quantity?: number;
   status: UserEbookStatus;
   purchasedAt?: Date;
   lastReadPage?: number;
@@ -28,6 +29,7 @@ export class UserEbook extends Model<UserEbookAttributes, UserEbookInput> implem
   declare id: string;
   declare userId: string;
   declare ebookId: string;
+  declare quantity?: number;
   declare status: UserEbookStatus;
   public purchasedAt?: Date;
   public lastReadPage?: number;
@@ -56,6 +58,11 @@ UserEbook.init(
         key: 'id'
       },
       onDelete: 'CASCADE'
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
     },
     purchasedAt: {
       type: DataTypes.DATE,

@@ -18,6 +18,10 @@ import { DeliveryStatus } from "@/domain/model/delivery";
 import { CartRepository } from "@/domain/repositories/cart/cart-repository";
 import { CartStatus } from "@/domain/model/cart";
 import { BusinessException } from "@/Exceptions/BusinessExceptions";
+import { TransactionRepository } from "@/domain/repositories/transaction/transaction-repository";
+import { TransactionInput, TransactionStatus, TransactionType } from "@/domain/model/transaction";
+import { UserEbookOutput } from "@/domain/model/userBook";
+import { UserEbookResponses } from "@/domain/Dto/user-ebook";
 
 interface UserBookAssociationDto {
   orderItems?: OrderItemDto[];
@@ -32,6 +36,7 @@ export class PaymentUsecases {
     private userbookRepository: UserBookRepository,
     private deliveryRepository: DeliveryRepository,
     private cartRepository: CartRepository,
+    private transactionRepository: TransactionRepository,
   ) {}
 
   async createPayment(data: PaymentDto, token: string): Promise<any> {
@@ -159,7 +164,7 @@ export class PaymentUsecases {
             DeliveryStatus.processing,
           );
 
-          await this.userbookAssociation({
+          const userBook = await this.userbookAssociation({
             orderItems: order.orderItems,
             userId: data.userId,
           });
@@ -171,6 +176,8 @@ export class PaymentUsecases {
             order.cartId,
             data.userId,
           );
+
+          await this.addTransaction(userBook);
         } else {
           await this.userbookAssociation({
             orderItems: order.orderItems,
@@ -321,4 +328,27 @@ export class PaymentUsecases {
       throw HttpExceptionFactory.badRequest(message);
     }
   }
+
+  private async addTransaction(
+  userBooks: UserEbookResponses[]
+) {
+  const transactions = [];
+
+  for (const book of userBooks) {
+    const transaction =
+      await this.transactionRepository.create({
+        userId: book.userId,
+        bookId: book.ebookId,
+        type: TransactionType.sale,
+        amount: Number(book.book.price)*book.quantity,
+        sellerId: book.book.sellerId,
+        status: TransactionStatus.confirmed,
+        quantity: book.quantity
+      });
+
+    transactions.push(transaction);
+  }
+
+  return transactions;
+}
 }

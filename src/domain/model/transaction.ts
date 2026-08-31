@@ -19,12 +19,13 @@ export interface TransactionAttriutes {
   type: TransactionType;
   amount: number;
   status: TransactionStatus;
-  bookId: string;
+  bookId?: string;
+  quantity?: number;
   userId?: string;
   sellerId?: string;
 }
 export interface TransactionInput
-  extends Optional<TransactionAttriutes, 'id' | 'status'> {}
+  extends Optional<TransactionAttriutes, 'id'> {}
 export interface TransactionOutput
   extends Required<TransactionAttriutes> {}
 
@@ -37,6 +38,7 @@ export class Transaction extends
   declare amount: number;
   declare status: TransactionStatus;
   declare bookId: string;
+  declare quantity?: number;
   declare userId?: string;
   declare sellerId?: string;
 
@@ -59,6 +61,7 @@ Transaction.init({
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
+  
   userId: {
     type: DataTypes.UUID,
     allowNull: true,
@@ -68,7 +71,7 @@ Transaction.init({
     allowNull: true,
   },
   type: {
-    type: DataTypes.ENUM("sell", "refund", "withdrawal"),
+    type: DataTypes.ENUM("sale", "refund", "withdrawal"),
     allowNull: false,
   },
   status: {

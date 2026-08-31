@@ -76,15 +76,6 @@ export class EBookUsecases {
     return book;
   }
 
-  async findBySeller(sellerId: string): Promise<EbookResponse[]> {
-    const book = await this.ebookRepository.findBySeller(sellerId);
-
-    if (!book) {
-      throw HttpExceptionFactory.notFound("Livro nao encontrado!");
-    }
-
-    return book;
-  }
 
   async update(id: string, data: EbookDto): Promise<EbookResponse | null> {
     const bookFound = await this.ebookRepository.findById(id);

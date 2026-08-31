@@ -1,8 +1,95 @@
 tags:
   - name: Sellers
-    description: Operacoes do vendedor
+    description: Operações do vendedor
 
 paths:
+  /seller/withdrawal-request:
+    post:
+      summary: Solicitar saque
+      description: Cria uma nova solicitação de saque para o vendedor autenticado.
+      operationId: createWithdrawalRequest
+      tags:
+        - Sellers
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalRequest"
+            example:
+              amount: 250.00
+              reason: "Solicitação de retirada"
+      responses:
+        "201":
+          description: Solicitação de saque criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalResponse"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "403":
+          description: Usuário não autorizado como vendedor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "500":
+          description: Erro interno ao criar a solicitação
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+
+  /seller/books:
+    get:
+      summary: Listar livros do vendedor
+      description: Retorna os livros cadastrados pelo vendedor autenticado.
+      operationId: getSellerBooks
+      tags:
+        - Sellers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de livros retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SellerBook"
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "403":
+          description: Usuário não autorizado como vendedor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "500":
+          description: Erro interno ao buscar livros
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+
   /seller/earnings:
     get:
       summary: Consultar ganhos do vendedor
@@ -20,13 +107,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/EarningsResponse"
         "401":
-          description: Usuario nao autenticado
+          description: Usuário não autenticado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SellerErrorResponse"
         "403":
-          description: Usuario nao autorizado como vendedor
+          description: Usuário não autorizado como vendedor
           content:
             application/json:
               schema:
@@ -38,10 +125,46 @@ paths:
               schema:
                 $ref: "#/components/schemas/SellerErrorResponse"
 
+  /seller/situation:
+    get:
+      summary: Consultar situação do vendedor
+      description: Retorna a situação atual do vendedor, incluindo status financeiro e de vendas.
+      operationId: getSellerSituation
+      tags:
+        - Sellers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Situação consultada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerSituationResponse"
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "403":
+          description: Usuário não autorizado como vendedor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "500":
+          description: Erro interno ao consultar situação
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+
   /seller/withdrawal/{withdrawalId}:
     put:
       summary: Atualizar status de um saque
-      operationId: updateSellerWithdrawalStatus
+      description: Atualiza o status de uma solicitação de saque do vendedor autenticado.
+      operationId: changeStatusWithdrawal
       tags:
         - Sellers
       security:
@@ -50,6 +173,7 @@ paths:
         - name: withdrawalId
           in: path
           required: true
+          description: ID da solicitação de saque
           schema:
             type: string
             format: uuid
@@ -59,24 +183,44 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/WithdrawalStatusRequest"
-            example:
-              status: completed
-              reason: "Saque processado"
+            examples:
+              approved:
+                summary: Aprovar saque
+                value:
+                  status: approved
+                  reason: "Pagamento liberado"
+              rejected:
+                summary: Rejeitar saque
+                value:
+                  status: rejected
+                  reason: "Dados do pagamento inválidos"
       responses:
         "200":
-          description: Status do saque atualizado com sucesso
+          description: Status atualizado com sucesso
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/WithdrawalResponse"
+        "400":
+          description: Status inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
         "401":
-          description: Usuario nao autenticado
+          description: Usuário não autenticado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SellerErrorResponse"
         "403":
-          description: Usuario nao autorizado como vendedor
+          description: Usuário não autorizado como vendedor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerErrorResponse"
+        "404":
+          description: Solicitação de saque não encontrada
           content:
             application/json:
               schema:
@@ -89,17 +233,25 @@ paths:
                 $ref: "#/components/schemas/SellerErrorResponse"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
-    EarningsResponse:
+    WithdrawalRequest:
       type: object
+      required:
+        - amount
       properties:
-        success:
-          type: boolean
-          example: true
-        earnings:
+        amount:
           type: number
           format: double
-          example: 1250.5
+          example: 250.00
+        reason:
+          type: string
+          example: "Solicitação de retirada"
 
     WithdrawalStatusRequest:
       type: object
@@ -108,10 +260,17 @@ components:
       properties:
         status:
           type: string
-          example: completed
+          enum:
+            - pending
+            - approved
+            - rejected
+            - cancelled
+            - completed
+            - blocked
+          example: approved
         reason:
           type: string
-          example: "Saque processado"
+          example: "Pagamento liberado"
 
     WithdrawalResponse:
       type: object
@@ -121,8 +280,52 @@ components:
           example: true
         message:
           type: string
-          example: "Status de saque actualizado com sucesso!"
+          example: "Solicitação de saque criada com sucesso!"
+        data:
+          type: object
+          additionalProperties: true
+
+    SellerBook:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "book_123"
+        title:
+          type: string
+          example: "Livro de Node.js"
+        price:
+          type: number
+          format: double
+          example: 89.90
+        stock:
+          type: integer
+          example: 15
+
+    EarningsResponse:
+      type: object
+      required:
+        - success
+        - earnings
+      properties:
+        success:
+          type: boolean
+          example: true
         earnings:
+          type: number
+          format: double
+          example: 1250.5
+        currency:
+          type: string
+          example: BRL
+
+    SellerSituationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
           type: object
           additionalProperties: true
 
@@ -134,3 +337,8 @@ components:
           example: false
         message:
           type: string
+          example: "Acesso negado"
+        error:
+          type: string
+          nullable: true
+          example: "Unauthorized"

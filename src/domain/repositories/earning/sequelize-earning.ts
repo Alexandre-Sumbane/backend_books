@@ -10,9 +10,10 @@ type UserEbookWithBook = UserEbook & {
   book: Ebook;
 };
 
-type SellerSituation = {
+export type SellerSituation = {
   totalEarnings: number | string;
   totalWithdrawal: number | string;
+  balance?: number;
 };
 
 export class SequelizeEarningRepository implements EarningRepository {
@@ -128,7 +129,7 @@ export class SequelizeEarningRepository implements EarningRepository {
     return summary;
   }
 
-  static async getOrganizerSituation(sellerId: string) {
+  async getSellerSituation(sellerId: string) {
     const result = (await Transaction.findOne({
       attributes: [
         [

@@ -11,6 +11,24 @@ import { WithdrawalRequestRepository } from "./withdrawalrequest-repository";
 import { ChangeWithdrawalRequestDto } from "@/domain/Dto/with-drawal.dto";
 
 export class SequelizeWithdrawalRepository implements WithdrawalRequestRepository {
+  async create({
+    sellerId,
+    reference,
+    amount,
+    walletId,
+  }: WithdrawalRequestOutput) {
+
+    const withdrawalRequest = await WithdrawalRequest.create({
+      sellerId,
+      reference,
+      amount,
+      walletId,
+      status: WithdrawalRequestStatus.pending,
+    });
+
+    return withdrawalRequest as WithdrawalRequestOutput;
+    
+  }
   async findById(id: string): Promise<WithdrawalRequestOutput> {
     const withdrawalRequest = await WithdrawalRequest.findByPk(id);
 
@@ -74,5 +92,9 @@ export class SequelizeWithdrawalRepository implements WithdrawalRequestRepositor
 
       throw error;
     }
+  }
+
+   public createReference(): string {
+      return `WITHDR-${Date.now()}`;
   }
 }

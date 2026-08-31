@@ -148,11 +148,10 @@ export class AdminController {
         });
       }
 
-      const { withdrawalId, status, reason } = req.body;
+      const { status, reason } = req.body;
 
       const earnings = await adminUsecase.changestatusWithdrwalRequest({
-        withdrawalId,
-        userId: req.user.userId,
+        withdrawalId: req.params.withdrawalId as string,
         status,
         reason,
       });

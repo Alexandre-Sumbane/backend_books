@@ -6,6 +6,53 @@ import { Request, Response } from "express";
 
 const sellerUsecase = MakeSellerUsecase();
 export class SellerController {
+
+  static async createWithdrawal(req: Request, res: Response): Promise<Response> {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const user = await userIsAssociado(req.user.userId, req.user.token);
+
+      if (!user) {
+        return res.status(403).json({
+          success: false,
+          message: "Não autorizado a criar Books",
+        });
+      }
+
+      const withdrawal = await sellerUsecase.createWithdrawalRequest(
+        {
+          sellerId: req.user.userId,
+          walletId: req.body.walletId,
+          amount: req.body.amount,
+        }
+      );
+
+      return res.status(201).json({
+        success: true,
+        withdrawal,
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          sucess: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao criar saque, tente novamente!",
+      });
+    }
+  }
   static async getEarnings(req: Request, res: Response): Promise<Response> {
     try {
       if (!req.user) {
@@ -87,6 +134,47 @@ export class SellerController {
       });
     }
   }
+
+  static async getSellerSituation(req: Request, res: Response): Promise<Response> {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      const user = await userIsAssociado(req.user.userId, req.user.token);
+
+      if (!user) {
+        return res.status(403).json({
+          success: false,
+          message: "Não autorizado a criar Books",
+        });
+      }
+
+      const situation = await sellerUsecase.getSellerSituation(req.user.userId);
+
+      return res.status(200).json({
+        success: true,
+        situation,
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          sucess: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao pegar situação, tente novamente!",
+      });
+    }
+  } 
 
   static async changeStatusWithdrawal(req: Request, res: Response): Promise<Response> {
     try {

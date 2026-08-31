@@ -5,23 +5,74 @@ import {
 } from "@/domain/model/userBook";
 import { UserBookRepository } from "./userRepository";
 import { OrderItemDto } from "@/domain/model/orderitem";
+import { UserEbookResponses } from "@/domain/Dto/user-ebook";
+import { Ebook } from "@/domain/model/book";
 
 export class SequelizeUserBookRepository implements UserBookRepository {
-  async addUserBook(orderItems: OrderItemDto[], userId: string) {
+  //  async addUserBook(
+  //   orderItems: OrderItemDto[],
+  //   userId: string
+  // ): Promise<UserEbookResponses[]> {
+  //   const ebookIds = orderItems.map((item) => item.bookId);
 
-    let userBook;
+  //   await UserEbook.bulkCreate(
+  //     ebookIds.map((ebookId) => ({
+  //       userId,
+  //       ebookId,
+  //       status: UserEbookStatus.active,
+  //       purchasedAt: new Date(),
+  //       quantity
+  //     }))
+  //   );
 
-    for(const orderItem of orderItems){
-      const {bookId} = orderItem;
-      userBook = await UserEbook.create({
+  //   const userBooks = await UserEbook.findAll({
+  //     where: {
+  //       userId,
+  //       ebookId: ebookIds,
+  //     },
+  //     include: [
+  //       {
+  //         model: Ebook,
+  //         as: "book",
+  //       },
+  //     ],
+  //   });
+
+  //   return userBooks.map(
+  //     (userBook) => userBook.toJSON() as UserEbookResponses
+  //   );
+  // }
+
+  async addUserBook(
+    orderItems: OrderItemDto[],
+    userId: string,
+  ): Promise<UserEbookResponses[]> {
+    await UserEbook.bulkCreate(
+      orderItems.map((item) => ({
         userId,
-        ebookId: bookId,
+        ebookId: item.bookId,
         status: UserEbookStatus.active,
         purchasedAt: new Date(),
-      });
-    }
+        quantity: item.quantity,
+      })),
+    );
 
-    return userBook as UserEbookOutput;
+    const ebookIds = orderItems.map((item) => item.bookId);
+
+    const userBooks = await UserEbook.findAll({
+      where: {
+        userId,
+        ebookId: ebookIds,
+      },
+      include: [
+        {
+          model: Ebook,
+          as: "book",
+        },
+      ],
+    });
+
+    return userBooks.map((userBook) => userBook.toJSON() as UserEbookResponses);
   }
 
   async getUserBooks(userId: string) {
