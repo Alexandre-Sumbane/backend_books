@@ -21,7 +21,7 @@ export class SellerController {
       if (!user) {
         return res.status(403).json({
           success: false,
-          message: "Não autorizado a criar Books",
+          message: "Não autorizado a criar pedido de saque",
         });
       }
 
@@ -67,7 +67,7 @@ export class SellerController {
       if (!user) {
         return res.status(403).json({
           success: false,
-          message: "Não autorizado a criar Books",
+          message: "Não autorizado a pegar ganhos deste usuário",
         });
       }
 
@@ -108,7 +108,7 @@ export class SellerController {
       if (!user) {
         return res.status(403).json({
           success: false,
-          message: "Não autorizado a criar Books",
+          message: "Não autorizado a pegar livros comprados deste usuário",
         });
       }
 
@@ -149,7 +149,7 @@ export class SellerController {
       if (!user) {
         return res.status(403).json({
           success: false,
-          message: "Não autorizado a criar Books",
+          message: "Não autorizado a pegar situação financeira deste usuário",
         });
       }
 
@@ -171,7 +171,7 @@ export class SellerController {
 
       return res.status(500).json({
         success: false,
-        message: "Ocorreu erro ao pegar situação, tente novamente!",
+        message: "Ocorreu erro ao pegar situação financeira, tente novamente!",
       });
     }
   } 
@@ -190,7 +190,7 @@ export class SellerController {
       if (!user) {
         return res.status(403).json({
           success: false,
-          message: "Não autorizado a criar Books",
+          message: "Não autorizado a alterar status de saque deste usuário",
         });
       }
 

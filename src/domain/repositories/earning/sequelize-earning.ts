@@ -24,7 +24,15 @@ export class SequelizeEarningRepository implements EarningRepository {
         {
           model: Ebook,
           as: "book",
-          attributes: ["id", "title", "code", "price", "language", "author"],
+          attributes: [
+            "id",
+            "title",
+            "code",
+            "price",
+            "language",
+            "author",
+            "quantity",
+          ],
           required: true,
           where: { sellerId },
           include: [
@@ -40,7 +48,8 @@ export class SequelizeEarningRepository implements EarningRepository {
     })) as UserEbookWithBook[];
 
     const total = bookusers.reduce(
-      (acc, userBook) => acc + Number(userBook.book.price),
+      (acc, userBook) =>
+        acc + Number(userBook.book.price) * Number(userBook.quantity),
       0,
     );
 
