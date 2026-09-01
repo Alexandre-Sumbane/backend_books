@@ -50,44 +50,84 @@ export class SequelizeAdminRepository implements AdminRepository {
     }
   }
 
+  // async changestatusWithdrwalRequest({
+  //   withdrawalId,
+  //   status,
+  //   reason,
+  // }: ChangeWithdrawalRequestDto) {
+  //   const transaction = await sequelizeConnection.transaction();
+
+  //   try {
+  //     const withdrawalRequest = await WithdrawalRequest.findByPk(withdrawalId);
+
+  //     if (!withdrawalRequest) {
+  //       return null;
+  //     }
+
+  //     const updated = await withdrawalRequest?.update(
+  //       {
+  //         status: status,
+  //         reason: reason,
+  //       },
+  //       {
+  //         where: {
+  //           id: withdrawalId,
+  //         },
+  //         transaction,
+  //       },
+  //     );
+
+  //     await transaction.commit();
+
+  //     return updated as WithdrawalRequestOutput;
+  //   } catch (error) {
+  //     console.log("Erro ao atualizar status do pedido:", error);
+
+  //     await transaction.rollback();
+
+  //     throw error;
+  //   }
+  // }
+
   async changestatusWithdrwalRequest({
-    withdrawalId,
-    status,
-    reason,
-  }: ChangeWithdrawalRequestDto) {
-    const transaction = await sequelizeConnection.transaction();
+  withdrawalId,
+  status,
+  reason,
+}: ChangeWithdrawalRequestDto) {
+  const transaction = await sequelizeConnection.transaction();
 
-    try {
-      const withdrawalRequest = await WithdrawalRequest.findByPk(withdrawalId);
+  try {
+    const withdrawalRequest = await WithdrawalRequest.findByPk(
+      withdrawalId,
+      { transaction }
+    );
 
-      if (!withdrawalRequest) {
-        return null;
-      }
-
-      const updated = await withdrawalRequest?.update(
-        {
-          status: status,
-          reason: reason,
-        },
-        {
-          where: {
-            id: withdrawalId,
-          },
-          transaction,
-        },
-      );
-
-      await transaction.commit();
-
-      return updated as WithdrawalRequestOutput;
-    } catch (error) {
-      console.log("Erro ao atualizar status do pedido:", error);
-
+    if (!withdrawalRequest) {
       await transaction.rollback();
-
-      throw error;
+      return null;
     }
+
+    const updated = await withdrawalRequest.update(
+      {
+        status,
+        reason,
+      },
+      {
+        transaction,
+      },
+    );
+
+    await transaction.commit();
+
+    return updated as WithdrawalRequestOutput;
+  } catch (error) {
+    console.log("Erro ao atualizar status do pedido:", error);
+
+    await transaction.rollback();
+
+    throw error;
   }
+}
 
   async getClientConfirmations() {
     const confirmations = await ClientConfirmation.findAll({

@@ -19,8 +19,7 @@ import { CartRepository } from "@/domain/repositories/cart/cart-repository";
 import { CartStatus } from "@/domain/model/cart";
 import { BusinessException } from "@/Exceptions/BusinessExceptions";
 import { TransactionRepository } from "@/domain/repositories/transaction/transaction-repository";
-import { TransactionInput, TransactionStatus, TransactionType } from "@/domain/model/transaction";
-import { UserEbookOutput } from "@/domain/model/userBook";
+import { TransactionStatus, TransactionType } from "@/domain/model/transaction";
 import { UserEbookResponses } from "@/domain/Dto/user-ebook";
 
 interface UserBookAssociationDto {

@@ -3,7 +3,7 @@ import { EarningRepository } from "./earning-repositories";
 import { Ebook } from "@/domain/model/book";
 import { Category } from "@/domain/model/category";
 import axios from "axios";
-import { Transaction } from "@/domain/model/transaction";
+import { Transaction, TransactionStatus } from "@/domain/model/transaction";
 import { fn, literal } from "sequelize";
 
 type UserEbookWithBook = UserEbook & {
@@ -155,7 +155,7 @@ export class SequelizeEarningRepository implements EarningRepository {
           "totalWithdrawal",
         ],
       ],
-      where: { sellerId },
+      where: { sellerId, status: TransactionStatus.confirmed },
       raw: true,
     })) as SellerSituation | null;
 

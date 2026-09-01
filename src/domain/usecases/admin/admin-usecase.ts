@@ -45,8 +45,8 @@ export class AdminUsecase {
 
         if(result.status === "approved"){
           await this.transactionRepository.create({
-            amount: -Number(withdrawal.amount),
-            sellerId: withdrawal.sellerId,
+            amount: -Number(result.amount),
+            sellerId: result.sellerId,
             type: TransactionType.withdrawal,
             status: TransactionStatus.confirmed
           })
