@@ -12,6 +12,7 @@ import { ChangeWithdrawalRequestDto } from "@/domain/Dto/with-drawal.dto";
 
 export class SequelizeWithdrawalRepository implements WithdrawalRequestRepository {
   async create({
+    id,
     sellerId,
     reference,
     amount,
@@ -19,6 +20,7 @@ export class SequelizeWithdrawalRepository implements WithdrawalRequestRepositor
   }: WithdrawalRequestOutput) {
 
     const withdrawalRequest = await WithdrawalRequest.create({
+      id,
       sellerId,
       reference,
       amount,

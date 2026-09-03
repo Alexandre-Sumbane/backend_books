@@ -26,7 +26,7 @@ export interface WithdrawalRequestAtributes {
   canceledAt?: Date
 }
 export interface WithdrawalRequestInput
-  extends Optional<WithdrawalRequestAtributes, 'id' | 'status' | 'approvedAt' | 'rejectedAt' | 'canceledAt'> {}
+  extends Optional<WithdrawalRequestAtributes,  | 'status' | 'approvedAt' | 'rejectedAt' | 'canceledAt'> {}
 export interface WithdrawalRequestOutput
   extends Required<WithdrawalRequestAtributes> {}
 
