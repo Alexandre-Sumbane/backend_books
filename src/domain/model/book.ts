@@ -42,11 +42,12 @@ export interface EBookModel {
   publishDate?: Date;
   statePublisher?: EbookStatus;
   sellerId?: string;
+  itemName?: string;
 }
 
 export interface EBookDto extends Optional<
   EBookModel,
-  "id" | "publishDate" | "statePublisher" | "rating" | "totalReviews"
+  "id" | "publishDate" | "statePublisher" | "rating" | "totalReviews" | "itemName"
 > {}
 
 export class Ebook extends Model<EBookModel, EBookDto> implements EBookModel {
@@ -68,6 +69,7 @@ export class Ebook extends Model<EBookModel, EBookDto> implements EBookModel {
   declare publishDate?: Date;
   declare statePublisher?: EbookStatus;
   declare sellerId?: string;
+  declare itemName?: string;
 }
 
 Ebook.init(
@@ -152,6 +154,10 @@ Ebook.init(
       type: DataTypes.UUID,
       allowNull: true,
     },
+    itemName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    }
   },
   {
     timestamps: true,

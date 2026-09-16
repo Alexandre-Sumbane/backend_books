@@ -41,4 +41,5 @@ export interface EbookResponse {
   publishDate?: Date;
   statePublisher?: EbookStatus;
   sellerId?: string;
+  itemName: string
 }
