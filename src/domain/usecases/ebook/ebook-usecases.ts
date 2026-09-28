@@ -3,7 +3,7 @@ import { HttpExceptionFactory } from "../../../../helpers/HttpExceptionFactory";
 import { EbookDto, EbookResponse } from "@/domain/Dto/Book";
 
 import { Request } from "express";
-import { EbookFormat } from "@/domain/model/book";
+import { EbookFormat, EbookStatus } from "@/domain/model/book";
 
 export class EBookUsecases {
   constructor(private ebookRepository: EbookRepository) {}
@@ -76,6 +76,12 @@ export class EBookUsecases {
     return book;
   }
 
+  async findBySeller(sellerId: string): Promise<EbookResponse[]> {
+    const books = await this.ebookRepository.findBySeller(sellerId);
+
+    return books;
+  }
+
 
   async update(id: string, data: EbookDto): Promise<EbookResponse | null> {
     const bookFound = await this.ebookRepository.findById(id);
@@ -85,6 +91,28 @@ export class EBookUsecases {
     }
 
     const book = await this.ebookRepository.update(id, data);
+
+    return book;
+  }
+
+  async confirm(id: string, status: EbookStatus): Promise<EbookResponse | null> {
+    const validStatus = [EbookStatus.published, EbookStatus.rejected];
+
+    if (!validStatus.includes(status)) {
+      throw HttpExceptionFactory.badRequest("Status invalido! Use published ou rejected.");
+    }
+
+    const bookFound = await this.ebookRepository.findById(id);
+
+    if (!bookFound) {
+      throw HttpExceptionFactory.notFound("Livro nao encontrado!");
+    }
+
+    if (bookFound.statePublisher === status) {
+      throw HttpExceptionFactory.badRequest(`Livro ja esta com status ${status}!`);
+    }
+
+    const book = await this.ebookRepository.confirm(id, status);
 
     return book;
   }

@@ -536,6 +536,143 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /books/{ebookId}/confirm:
+    patch:
+      summary: Publicar ou rejeitar ebook (admin)
+      description: |
+        Permite ao administrador aprovar (`published`) ou rejeitar (`rejected`) um ebook pendente.
+        Ao publicar, o campo `publishDate` é preenchido com a data atual.
+        Requer token JWT com `userType` igual a `admin`.
+      operationId: confirmEbook
+      tags:
+        - Ebooks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ebookId
+          in: path
+          required: true
+          description: ID do ebook
+          schema:
+            type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - published
+                    - rejected
+                  description: Novo status do ebook
+            examples:
+              publicar:
+                summary: Publicar ebook
+                value:
+                  status: "published"
+              rejeitar:
+                summary: Rejeitar ebook
+                value:
+                  status: "rejected"
+      responses:
+        "200":
+          description: Status do ebook alterado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  ebook:
+                    $ref: "#/components/schemas/EbookResponse"
+              examples:
+                publicado:
+                  summary: Ebook publicado
+                  value:
+                    success: true
+                    message: "Book publicado com sucesso!"
+                    ebook:
+                      id: "123e4567-e89b-12d3-a456-426614174000"
+                      code: "TS-001"
+                      title: "Aprendendo TypeScript"
+                      author: "João da Silva"
+                      language: "Português"
+                      price: 29.9
+                      categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                      format: "pdf"
+                      publishDate: "2026-09-28T12:00:00.000Z"
+                      statePublisher: "published"
+                rejeitado:
+                  summary: Ebook rejeitado
+                  value:
+                    success: true
+                    message: "Book rejeitado com sucesso!"
+                    ebook:
+                      id: "123e4567-e89b-12d3-a456-426614174000"
+                      code: "TS-001"
+                      title: "Aprendendo TypeScript"
+                      author: "João da Silva"
+                      language: "Português"
+                      price: 29.9
+                      categoryId: "123e4567-e89b-12d3-a456-426614174000"
+                      format: "pdf"
+                      publishDate: null
+                      statePublisher: "rejected"
+        "400":
+          description: Status inválido ou ebook já está com o status informado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                statusInvalido:
+                  value:
+                    success: false
+                    message: "Status invalido! Use published ou rejected."
+                mesmoStatus:
+                  value:
+                    success: false
+                    message: "Livro ja esta com status published!"
+        "401":
+          description: Token não fornecido ou usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Usuário não é administrador ou token inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "Usuário nao autorizado a confirmar Books"
+        "404":
+          description: Ebook não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "Livro nao encontrado!"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     EbookResponse:
@@ -575,6 +712,7 @@ components:
           enum:
             - pendent
             - published
+            - rejected
             - blocked
           nullable: true
         userId:

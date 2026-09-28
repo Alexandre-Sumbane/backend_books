@@ -227,6 +227,52 @@ export class EbookController {
     }
   }
 
+  static async confirm(req: Request, res: Response): Promise<Response> {
+    const { ebookId } = req.params as { ebookId: string };
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Usuário não autenticado",
+        });
+      }
+
+      if (req.user.userType !== "admin") {
+        return res.status(403).json({
+          success: false,
+          message: "Usuário nao autorizado a confirmar Books",
+        });
+      }
+
+      const { status } = req.body;
+
+      const ebook = await ebookUsecase.confirm(ebookId, status);
+
+      return res.status(200).json({
+        success: true,
+        message:
+          status === "published"
+            ? "Book publicado com sucesso!"
+            : "Book rejeitado com sucesso!",
+        ebook,
+      });
+    } catch (error: any) {
+      console.log(error);
+
+      if (error instanceof BusinessException) {
+        return res.status(error.statusCode).json({
+          sucess: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: "Ocorreu erro ao confirmar Book, tente novamente!",
+      });
+    }
+  }
+
   static async delete(req: Request, res: Response): Promise<Response> {
     const { ebookId } = req.params as { ebookId: string };
     try {

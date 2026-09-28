@@ -8,9 +8,10 @@ import { OrderItem } from "./orderitem";
 import { UserEbook } from "./userBook";
 
 export enum EbookStatus {
-  pendent,
-  published,
-  blocked,
+  pendent = "pendent",
+  published = "published",
+  rejected = "rejected",
+  blocked = "blocked",
 }
 
 export enum EbookType {
@@ -146,7 +147,7 @@ Ebook.init(
       allowNull: true,
     },
     statePublisher: {
-      type: DataTypes.ENUM("pendent", "published", "blocked"),
+      type: DataTypes.ENUM("pendent", "published", "rejected", "blocked"),
       defaultValue: "pendent",
       allowNull: true,
     },

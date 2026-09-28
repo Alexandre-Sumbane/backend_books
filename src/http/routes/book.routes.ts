@@ -23,6 +23,7 @@ router.get("/", EbookController.findAll);
 router.get("/category/:categoryId", EbookController.findByCategoryId);
 router.get("/:ebookId", EbookController.findById);
 router.put("/:ebookId", AuthMiddleware.authenticate, EbookController.update);
+router.patch("/:ebookId/confirm", AuthMiddleware.authenticate, EbookController.confirm);
 router.delete("/:ebookId", AuthMiddleware.authenticate, EbookController.delete);
 
 

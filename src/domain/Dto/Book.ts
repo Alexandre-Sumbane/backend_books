@@ -1,10 +1,4 @@
-import { EbookFormat, EbookType } from "../model/book";
-
-enum EbookStatus {
-  pendent,
-  published,
-  blocked,
-}
+import { EbookFormat, EbookStatus, EbookType } from "../model/book";
 
 export interface EbookDto {
   title: string;

@@ -1,7 +1,7 @@
 import { EbookDto, EbookResponse } from "@/domain/Dto/Book";
 import { EbookRepository } from "./ebook-repository";
 
-import { Ebook } from "@/domain/model/book";
+import { Ebook, EbookStatus } from "@/domain/model/book";
 
 import { CoverImage } from "@/domain/model/coverImage";
 import { EbookFile } from "@/domain/model/bookFile";
@@ -221,6 +221,21 @@ export class SequelizeEbooksRepository implements EbookRepository {
     }
 
     const ebook = await ebookFound.update({ quantity });
+
+    return ebook;
+  }
+
+  async confirm(ebookId: string, status: EbookStatus) {
+    const ebookFound = await this.findById(ebookId);
+
+    if (!ebookFound) {
+      return null;
+    }
+
+    const ebook = await ebookFound.update({
+      statePublisher: status,
+      publishDate: status === EbookStatus.published ? new Date() : undefined,
+    });
 
     return ebook;
   }
