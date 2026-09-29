@@ -20,13 +20,16 @@ export default {
       ];
     const allowedPdfTypes = ['application/pdf'];
 
+    if (file.fieldname === 'cover' && !allowedImageTypes.includes(file.mimetype)) {
+      return cb(new Error("O campo 'cover' aceita apenas imagens (PNG, JPG, WEBP, ...)."));
+    }
+
+    if (file.fieldname === 'file' && !allowedPdfTypes.includes(file.mimetype)) {
+      return cb(new Error("O campo 'file' aceita apenas ficheiros PDF."));
+    }
+
     if (![...allowedImageTypes, ...allowedPdfTypes].includes(file.mimetype)) {
-      return cb(
-        new multer.MulterError(
-          'LIMIT_UNEXPECTED_FILE',
-          'Apenas ficheiros PNG, JPG ou PDF são permitidos.'
-        )
-      );
+      return cb(new Error('Apenas ficheiros de imagem ou PDF são permitidos.'));
     }
 
     cb(null, true);

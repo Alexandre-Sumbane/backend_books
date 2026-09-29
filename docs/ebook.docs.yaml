@@ -16,7 +16,16 @@ paths:
   /books:
     post:
       summary: Criar um novo ebook
-      description: Cria um novo registro de ebook e armazena arquivos de capa e PDF.
+      description: |
+        Cria um novo registro de ebook e armazena os ficheiros de capa e PDF.
+        O livro é criado com `statePublisher: pendent` e precisa ser aprovado por um admin
+        em `PATCH /books/{ebookId}/confirm`.
+
+        **Ficheiros (multipart/form-data)** — apenas estes nomes de campo são aceites:
+        - `cover`: imagem de capa (PNG, JPG, WEBP, GIF, BMP, SVG, TIFF), obrigatório, até 5 ficheiros
+        - `file`: ficheiro PDF, 1 ficheiro, obrigatório quando `format` é `pdf`
+
+        Qualquer outro nome de campo de ficheiro, ou quantidade acima do limite, devolve 400.
       operationId: createEbook
       tags:
         - Ebooks
@@ -26,16 +35,25 @@ paths:
         required: true
         content:
           multipart/form-data:
+            encoding:
+              cover:
+                contentType: image/png, image/jpeg, image/jpg, image/webp, image/gif, image/bmp, image/svg+xml, image/tiff
+              file:
+                contentType: application/pdf
             schema:
               type: object
               required:
                 - title
                 - code
+                - sinopse
+                - description
                 - author
                 - categoryId
                 - format
                 - language
                 - price
+                - pages
+                - cover
               properties:
                 title:
                   type: string
@@ -63,48 +81,61 @@ paths:
                   example: "123e4567-e89b-12d3-a456-426614174000"
                 format:
                   type: string
-                  description: Formato do ebook
-                  example: "PDF"
+                  enum:
+                    - pdf
+                    - physical
+                  description: Formato do ebook. Se `pdf`, o campo `file` é obrigatório.
+                  example: "pdf"
+                type:
+                  type: string
+                  enum:
+                    - new
+                    - used
+                  description: Estado do livro (opcional)
+                  example: "new"
                 language:
                   type: string
                   description: Idioma do ebook
                   example: "Português"
                 price:
                   type: number
+                  minimum: 1
                   description: Preço do ebook
                   example: 29.9
                 pages:
                   type: integer
+                  minimum: 1
                   description: Quantidade de páginas do ebook
                   example: 250
+                quantity:
+                  type: integer
+                  description: Quantidade em stock (para livros físicos)
+                  example: 10
                 cover:
                   type: array
+                  maxItems: 5
                   items:
                     type: string
                     format: binary
-                  description: Arquivos de imagem de capa
+                  description: Imagens de capa (campo `cover`, até 5)
                 file:
                   type: string
                   format: binary
-                  description: Arquivo PDF do ebook
-            example:
-              title: "Aprendendo TypeScript"
-              code: "TS-001"
-              description: "Um guia completo para programadores que querem dominar TypeScript."
-              sinopse: "Conceitos fundamentais e avançados de TypeScript para aplicações modernas."
-              author: "João da Silva"
-              categoryId: "123e4567-e89b-12d3-a456-426614174000"
-              format: "PDF"
-              language: "Português"
-              price: 29.9
-              pages: 250
+                  description: Ficheiro PDF do ebook (campo `file`, 1 ficheiro)
       responses:
         "201":
           description: Ebook criado com sucesso
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EbookResponse"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  ebook:
+                    $ref: "#/components/schemas/EbookResponse"
               example:
                 success: true
                 message: "Book criado com sucesso!"
@@ -118,16 +149,69 @@ paths:
                   description: "Um guia completo para programadores que querem dominar TypeScript."
                   price: 29.9
                   categoryId: "123e4567-e89b-12d3-a456-426614174000"
-                  format: "PDF"
+                  format: "pdf"
                   pages: 250
-                  publishDate: "2026-08-04T12:00:00.000Z"
-                  statePublisher: "published"
+                  publishDate: null
+                  statePublisher: "pendent"
         "400":
-          description: Dados inválidos fornecidos
+          description: Dados inválidos, ficheiros em falta ou erro de upload
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                validacao:
+                  summary: Erro de validação dos campos
+                  value:
+                    success: false
+                    message: "Verifique os dados preenchidos."
+                    errors:
+                      - field: "title"
+                        message: "Este campo é obrigatório."
+                campoInvalido:
+                  summary: Nome de campo de ficheiro inválido ou limite excedido
+                  value:
+                    success: false
+                    message: "Campo de ficheiro inválido ou excedido: 'pdf'. Use 'cover' (até 5 imagens) e 'file' (1 PDF)."
+                tipoInvalido:
+                  summary: Tipo de ficheiro inválido
+                  value:
+                    success: false
+                    message: "O campo 'file' aceita apenas ficheiros PDF."
+                capaEmFalta:
+                  summary: Capa não enviada
+                  value:
+                    success: false
+                    message: "Capa do livro nao enviada!"
+                pdfEmFalta:
+                  summary: PDF não enviado para formato pdf
+                  value:
+                    success: false
+                    message: "Nenhum ficheiro foi enviado!"
+        "401":
+          description: Token não fornecido ou usuário não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Token inválido ou usuário não autorizado a criar livros
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "Não autorizado a criar Books"
+        "409":
+          description: Já existe um livro com o código informado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                message: "O livro já existe, tente outro código!"
         "500":
           description: Erro interno do servidor
           content:
@@ -721,13 +805,21 @@ components:
     ErrorResponse:
       type: object
       properties:
-        statusCode:
-          type: integer
+        success:
+          type: boolean
+          example: false
         message:
           type: string
-        error:
-          type: string
+        errors:
+          type: array
           nullable: true
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
   securitySchemes:
     bearerAuth:
       type: http
