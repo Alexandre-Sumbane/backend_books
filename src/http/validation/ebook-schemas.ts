@@ -12,5 +12,5 @@ export const  CreateEbookSchema = z.object({
     language: z.string().min(1, { message: "Language is required" }),
     price: z.coerce.number().min(1, { message: "Price is required" }),
     pages: z.coerce.number().min(1, { message: "Pages is required" }),
-    type: z.enum(["used", "new"]).optional(), 
+    type: z.enum(["used", "new", "ebook"]).optional(), 
 });   
