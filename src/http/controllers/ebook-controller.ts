@@ -10,6 +10,23 @@ import { CreateEbookSchema } from "../validation/ebook-schemas";
 
 const ebookUsecase = MakeEBookUsecase();
 
+function formatValidationErrors(error: ZodError) {
+  const errors = error.issues.map((issue) => ({
+    field: issue.path.join("."),
+    message: issue.message,
+  }));
+  const fields = [...new Set(errors.map((e) => e.field).filter(Boolean))];
+
+  return {
+    success: false,
+    message:
+      fields.length > 0
+        ? `Campos inválidos ou não preenchidos: ${fields.join(", ")}.`
+        : "Verifique os dados preenchidos.",
+    errors,
+  };
+}
+
 export class EbookController {
   static async create(req: Request, res: Response): Promise<Response> {
     try {
@@ -31,17 +48,7 @@ export class EbookController {
       const result = CreateEbookSchema.safeParse(req.body);
 
       if (!result.success) {
-        return res.status(400).json({
-          success: false,
-          message: "Verifique os dados preenchidos.",
-          errors: result.error.issues.map((error) => ({
-            field: error.path.join("."),
-            message:
-              error.code === "invalid_type"
-                ? "Este campo é obrigatório."
-                : error.message,
-          })),
-        });
+        return res.status(400).json(formatValidationErrors(result.error));
       }
 
       const ebook = await ebookUsecase.create(req.body, req);
@@ -62,13 +69,7 @@ export class EbookController {
       }
 
       if (error instanceof ZodError || error instanceof ZodException) {
-        return res.status(400).json({
-          success: false,
-          message: "Erro de validação",
-          errors: error.issues.map((issue: { message: string }) => ({
-            message: issue.message,
-          })),
-        });
+        return res.status(400).json(formatValidationErrors(error));
       }
 
       return res.status(500).json({
